@@ -25,6 +25,10 @@ class TransferSerializer(serializers.Serializer):
 
 class TransactionResponseSerializer(serializers.ModelSerializer):
 
+    sender_username = serializers.SerializerMethodField()
+
+    receiver_username = serializers.SerializerMethodField()
+
     class Meta:
         model = Transaction
 
@@ -35,5 +39,25 @@ class TransactionResponseSerializer(serializers.ModelSerializer):
             "status",
             "sender_wallet",
             "receiver_wallet",
+            "sender_username",
+            "receiver_username",
             "created_at"
         ]
+
+    def get_sender_username(self, obj):
+
+        membership = obj.sender_wallet.memberships.first()
+
+        if membership:
+            return membership.user.username
+
+        return "Unknown"
+
+    def get_receiver_username(self, obj):
+
+        membership = obj.receiver_wallet.memberships.first()
+
+        if membership:
+            return membership.user.username
+
+        return "Unknown"
