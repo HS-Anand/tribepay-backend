@@ -6,6 +6,11 @@ from django.conf import settings
 
 class Transaction(models.Model):
 
+    class TransactionType(models.TextChoices):
+        TRANSFER = "TRANSFER", "Transfer"
+        DEPOSIT = "DEPOSIT", "Deposit"
+        WITHDRAWAL = "WITHDRAWAL", "Withdrawal"
+
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
         SUCCESS = "SUCCESS", "Success"
@@ -40,6 +45,12 @@ class Transaction(models.Model):
         decimal_places=2
     )
 
+    transaction_type = models.CharField(
+        max_length=20,
+        choices=TransactionType.choices,
+        default=TransactionType.TRANSFER
+    )
+    
     status = models.CharField(
         max_length=20,
         choices=Status.choices,

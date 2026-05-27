@@ -5,10 +5,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from apps.transactions.models import Transaction
 from apps.transactions.serializers import (
     TransferSerializer,
     TransactionResponseSerializer
 )
+
+from rest_framework.permissions import IsAuthenticated
 
 from apps.wallets.services.transfer_service import transfer_funds
 
@@ -17,6 +20,8 @@ User = get_user_model()
 
 
 class TransferView(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
 
@@ -32,8 +37,7 @@ class TransferView(APIView):
 
         validated_data = serializer.validated_data
 
-        # temporary user for testing
-        initiated_by_user = User.objects.first()
+        initiated_by_user = request.user
 
         try:
 
@@ -62,3 +66,24 @@ class TransferView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+class TransactionHistoryView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        transactions = Transaction.objects.filter(
+            sender_wallet__memberships__user=request.user
+        ) | Transaction.objects.filter(
+            receiver_wallet__memberships__user=request.user
+        )
+
+        transactions = transactions.distinct().order_by("-created_at")
+
+        serializer = TransactionResponseSerializer(
+            transactions,
+            many=True
+        )
+
+        return Response(serializer.data)

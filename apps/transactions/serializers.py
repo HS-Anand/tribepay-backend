@@ -30,6 +30,7 @@ class TransactionResponseSerializer(serializers.ModelSerializer):
 
         fields = [
             "tid",
+            "transaction_type",
             "amount",
             "status",
             "sender_wallet",
