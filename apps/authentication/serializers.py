@@ -1,7 +1,7 @@
 import re
 
 from rest_framework import serializers
-
+from django.db import transaction
 from apps.users.models import User
 from apps.wallets.services.wallet_service import create_personal_wallet
 
@@ -59,28 +59,57 @@ class SignupSerializer(serializers.ModelSerializer):
 
         return attrs
 
+    
+
     def create(self, validated_data):
 
-        validated_data.pop("confirm_password")
+        with transaction.atomic():
 
-        first_name = validated_data["first_name"].lower()
-        last_name = validated_data["last_name"].lower()
+            validated_data.pop(
+                "confirm_password"
+            )
 
-        username = (f"{first_name}_{last_name}_{validated_data['phone_number']}")
+            first_name = (
+                validated_data[
+                    "first_name"
+                ].lower()
+            )
 
-      
+            last_name = (
+                validated_data[
+                    "last_name"
+                ].lower()
+            )
 
-        user = User.objects.create_user(
-            username=username,
-            first_name=validated_data["first_name"],
-            last_name=validated_data["last_name"],
-            phone_number=validated_data["phone_number"],
-            password=validated_data["password"],
+            username = (
+                f"{first_name}_"
+                f"{last_name}_"
+                f"{validated_data['phone_number']}"
+            )
+
+            user = User.objects.create_user(
+                username=username,
+
+                first_name=validated_data[
+                    "first_name"
+            ],
+
+                last_name=validated_data[
+                    "last_name"
+            ],
+
+                phone_number=validated_data[
+                    "phone_number"
+            ],
+
+                password=validated_data[
+                    "password"
+            ],
         )
 
-        create_personal_wallet(user)
+            create_personal_wallet(user)
 
-        return user
+            return user
     
 class LoginSerializer(serializers.Serializer):
 

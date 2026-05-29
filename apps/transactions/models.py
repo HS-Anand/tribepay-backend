@@ -9,6 +9,8 @@ class Transaction(models.Model):
     class TransactionType(models.TextChoices):
         TRANSFER = "TRANSFER", "Transfer"
         DEPOSIT = "DEPOSIT", "Deposit"
+        GROUP_CONTRIBUTION = "GROUP_CONTRIBUTION", "Group Contribution"
+        GROUP_EXPENSE = "GROUP_EXPENSE", "Group Expense"
         WITHDRAWAL = "WITHDRAWAL", "Withdrawal"
 
     class Status(models.TextChoices):
