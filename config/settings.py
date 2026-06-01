@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "apps.wallets",
     "apps.transactions",
     "apps.authentication",
+    "apps.invoices",
 ]
 
 
