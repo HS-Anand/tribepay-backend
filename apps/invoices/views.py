@@ -13,8 +13,12 @@ from apps.invoices.serializers import (
 
 from apps.invoices.services.invoice_service import (
     create_invoice,
-    pay_invoice
+    pay_invoice,
+    reject_invoice
 )
+
+from django.db.models import Q
+from apps.invoices.models import CashInvoice
 
 
 User = get_user_model()
@@ -149,4 +153,107 @@ class PayInvoiceView(APIView):
             InvoiceSerializer(
                 invoice
             ).data
+        )
+    
+class RejectInvoiceView(APIView):
+
+    permission_classes = [
+        IsAuthenticated
+    ]
+
+
+    def post(
+        self,
+        request
+    ):
+
+        invoice_id = request.data.get(
+            "invoice_id"
+        )
+
+
+        invoice = reject_invoice(
+            user=request.user,
+            invoice_id=invoice_id
+        )
+
+
+        return Response(
+            {
+                "message": "Invoice rejected successfully",
+
+                "invoice_id": str(
+                    invoice.iid
+                ),
+
+                "status": invoice.status
+            },
+            status=200
+        )
+    
+class InvoiceListView(APIView):
+
+    permission_classes = [
+        IsAuthenticated
+    ]
+
+
+    def get(
+        self,
+        request
+    ):
+
+        role = request.query_params.get(
+            "role"
+        )
+
+        status = request.query_params.get(
+            "status"
+        )
+
+
+        if role == "payer":
+
+            invoices = CashInvoice.objects.filter(
+                payer=request.user
+            )
+
+
+        elif role == "creator":
+
+            invoices = CashInvoice.objects.filter(
+                created_by=request.user
+            )
+
+
+        else:
+
+            invoices = CashInvoice.objects.filter(
+                Q(created_by=request.user)
+                |
+                Q(payer=request.user)
+            )
+
+
+        if status:
+
+            invoices = invoices.filter(
+                status=status
+            )
+
+
+        invoices = invoices.order_by(
+            "-created_at"
+        )
+
+
+        serializer = InvoiceSerializer(
+            invoices,
+            many=True
+        )
+
+
+        return Response(
+            serializer.data,
+            status=200
         )

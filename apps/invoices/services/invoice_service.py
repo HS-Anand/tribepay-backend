@@ -132,3 +132,49 @@ def pay_invoice(
 
 
     return invoice
+
+@transaction.atomic
+def reject_invoice(
+    user,
+    invoice_id
+):
+
+    try:
+
+        invoice = (
+            CashInvoice.objects
+            .select_for_update()
+            .get(
+                iid=invoice_id
+            )
+        )
+
+    except CashInvoice.DoesNotExist:
+
+        raise ValidationError(
+            "Invoice not found."
+        )
+
+
+    if invoice.status != "PENDING":
+
+        raise ValidationError(
+            "Invoice already processed."
+        )
+
+
+    if invoice.payer != user:
+
+        raise ValidationError(
+            "You cannot reject this invoice."
+        )
+
+
+    invoice.status = "REJECTED"
+
+    invoice.save(
+        update_fields=["status"]
+    )
+
+
+    return invoice
