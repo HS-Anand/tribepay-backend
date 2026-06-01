@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "apps.transactions",
     "apps.authentication",
     "apps.invoices",
+    "apps.splits",
 ]
 
 
