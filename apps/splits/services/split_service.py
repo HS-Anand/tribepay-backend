@@ -168,7 +168,9 @@ def create_split(
 
                 amount=base_share,
 
-                description=title
+                description=title,
+
+                invoice_type="EXPENSE"
             )
 
 
@@ -272,7 +274,9 @@ def create_split(
 
                 amount=amount,
 
-                description=title
+                description=title,
+
+                invoice_type="EXPENSE"
             )
 
 

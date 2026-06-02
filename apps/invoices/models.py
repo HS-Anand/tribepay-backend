@@ -78,6 +78,25 @@ class CashInvoice(models.Model):
         max_length=40
     )
 
+    TYPE_CHOICES = [
+
+        (
+            "REQUEST",
+            "Request"
+        ),
+
+        (
+            "EXPENSE",
+            "Expense"
+        ),
+    ]
+
+
+    invoice_type = models.CharField(
+        max_length=20,
+        choices=TYPE_CHOICES,
+        default="REQUEST"
+    )
 
     status = models.CharField(
 
@@ -89,7 +108,7 @@ class CashInvoice(models.Model):
     )
 
 
-    transaction = models.OneToOneField(
+    transaction = models.ForeignKey(
 
         "transactions.Transaction",
 

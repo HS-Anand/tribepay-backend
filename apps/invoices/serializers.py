@@ -50,6 +50,8 @@ class InvoiceSerializer(
 
             "description",
 
+            "invoice_type",
+
             "status",
 
             "created_at",

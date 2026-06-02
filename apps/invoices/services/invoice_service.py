@@ -18,7 +18,8 @@ def create_invoice(
     created_by,
     payer,
     amount,
-    description
+    description,
+    invoice_type="REQUEST"
 ):
 
     if created_by == payer:
@@ -43,7 +44,9 @@ def create_invoice(
 
         amount=amount,
 
-        description=description
+        description=description,
+
+        invoice_type=invoice_type
     )
 
 
