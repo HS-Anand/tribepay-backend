@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.db import transaction
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 
 from apps.wallets.models import Wallet
 from apps.transactions.models import Transaction
@@ -28,7 +28,8 @@ def transfer_funds(
     sender_wallet_id,
     receiver_wallet_id,
     amount,
-    idempotency_key=None
+    idempotency_key=None,
+    transaction_type="TRANSFER"
 ):
 
     amount = Decimal(amount)
@@ -143,31 +144,30 @@ def transfer_funds(
 
             # 7. Transaction Type Resolution
 
-            transaction_type = (
-                Transaction.TransactionType.TRANSFER
-            )
+            if transaction_type == "TRANSFER":
 
-            if (
-                sender_wallet.wallet_type == "PRS"
-                and
-                receiver_wallet.wallet_type == "GRP"
-            ):
+                if (
+                    sender_wallet.wallet_type == "PRS"
+                    and
+                    receiver_wallet.wallet_type == "GRP"
+                ):
 
-                transaction_type = (
-                    Transaction.TransactionType
-                    .GROUP_CONTRIBUTION
-                )
+                    transaction_type = (
+                        Transaction.TransactionType
+                        .GROUP_CONTRIBUTION
+                    )
 
-            elif (
-                sender_wallet.wallet_type == "GRP"
-                and
-                receiver_wallet.wallet_type == "PRS"
-            ):
 
-                transaction_type = (
-                    Transaction.TransactionType
-                    .GROUP_EXPENSE
-                )
+                elif (
+                    sender_wallet.wallet_type == "GRP"
+                    and
+                    receiver_wallet.wallet_type == "PRS"
+                ):
+
+                    transaction_type = (
+                        Transaction.TransactionType
+                        .GROUP_EXPENSE
+                    )
 
             # 8. Immutable Success Entry Creation
 
@@ -185,7 +185,7 @@ def transfer_funds(
 
                 transaction_type=transaction_type,
 
-                idempotency_key=idempotency_key
+                idempotency_key=idempotency_key,
             )
 
     # 9. Clean Rollback Scopes

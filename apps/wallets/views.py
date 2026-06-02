@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 

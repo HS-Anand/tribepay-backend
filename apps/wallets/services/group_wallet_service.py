@@ -7,7 +7,7 @@ from apps.wallets.models import (
     Wallet,
     WalletMembership
 )
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 
 from apps.wallets.models import (
     GroupJoinRequest

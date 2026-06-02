@@ -12,6 +12,7 @@ class Transaction(models.Model):
         GROUP_CONTRIBUTION = "GROUP_CONTRIBUTION", "Group Contribution"
         GROUP_EXPENSE = "GROUP_EXPENSE", "Group Expense"
         WITHDRAWAL = "WITHDRAWAL", "Withdrawal"
+        SETTLEMENT = "SETTLEMENT", "Settlement"
 
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
