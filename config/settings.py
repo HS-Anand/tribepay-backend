@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -140,3 +141,31 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5174",
     "http://localhost:5174",
 ]
+
+CELERY_BROKER_URL = (
+
+    "redis://localhost:6379/0"
+
+)
+
+
+CELERY_RESULT_BACKEND = (
+
+    "redis://localhost:6379/0"
+
+)
+
+CELERY_BEAT_SCHEDULE = {
+
+    "expire-invoices-every-day": {
+
+        "task": (
+            "apps.invoices.tasks.expire_pending_invoices"
+        ),
+
+        "schedule": crontab(
+            hour=0,
+            minute=0
+        ),
+    },
+}

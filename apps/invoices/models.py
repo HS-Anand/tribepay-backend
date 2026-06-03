@@ -3,6 +3,16 @@ import uuid
 from django.db import models
 from django.conf import settings
 
+from django.utils import timezone
+from datetime import timedelta
+
+def default_expiry_time():
+
+    return (
+        timezone.now()
+        +
+        timedelta(days=7)
+    )
 
 class CashInvoice(models.Model):
 
@@ -131,6 +141,15 @@ class CashInvoice(models.Model):
         null=True,
 
         blank=True
+    )
+
+    expires_at = models.DateTimeField(
+        default=default_expiry_time
+    )
+
+
+    reminder_sent = models.BooleanField(
+        default=False
     )
 
 
