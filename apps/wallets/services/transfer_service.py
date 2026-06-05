@@ -1,9 +1,11 @@
 from decimal import Decimal
+
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from apps.wallets.models import Wallet
 from apps.transactions.models import Transaction
+from apps.notifications.services import create_notification
 
 
 class InsufficientBalanceException(Exception):
@@ -17,9 +19,7 @@ class UnauthorizedWalletException(Exception):
 class InactiveWalletException(Exception):
 
     def __init__(self, message):
-
         self.message = message
-
         super().__init__(self.message)
 
 
@@ -34,21 +34,20 @@ def transfer_funds(
 
     amount = Decimal(amount)
 
-    # 1. Light Sanity Checks (Pre-Transaction)
+    # 1. Light Sanity Checks
 
     if sender_wallet_id == receiver_wallet_id:
-
         raise ValidationError(
             "Cannot transfer to same wallet."
         )
 
     if amount <= 0:
-
         raise ValidationError(
             "Amount must be positive."
         )
 
-    # 2. Pure Idempotency Check
+
+    # 2. Idempotency Check
 
     if idempotency_key:
 
@@ -60,21 +59,21 @@ def transfer_funds(
         )
 
         if existing_transaction:
-
             return existing_transaction
+
 
     try:
 
         with transaction.atomic():
 
-            # 3. Deterministic Deadlock Prevention Sorting
+            # 3. Deadlock prevention ordering
 
-            wallet_ids = sorted([
-                sender_wallet_id,
-                receiver_wallet_id
-            ])
-
-            # 4. Strict Row Locking Sequence
+            wallet_ids = sorted(
+                [
+                    sender_wallet_id,
+                    receiver_wallet_id
+                ]
+            )
 
             wallets = (
                 Wallet.objects
@@ -91,58 +90,59 @@ def transfer_funds(
             for wallet in wallets:
 
                 if wallet.wid == sender_wallet_id:
-
                     sender_wallet = wallet
 
                 elif wallet.wid == receiver_wallet_id:
-
                     receiver_wallet = wallet
 
-            if not sender_wallet or not receiver_wallet:
 
+            if not sender_wallet or not receiver_wallet:
                 raise ValidationError(
                     "Wallet not found."
                 )
 
-            # 5. Lock-Protected Authorization & State Checks
+
+            # 4. Authorization checks
 
             membership_exists = (
-                sender_wallet.memberships.filter(
+                sender_wallet
+                .memberships
+                .filter(
                     user=initiated_by_user
-                ).exists()
+                )
+                .exists()
             )
 
             if not membership_exists:
-
                 raise UnauthorizedWalletException()
 
-            if not sender_wallet.is_active:
 
+            if not sender_wallet.is_active:
                 raise InactiveWalletException(
                     "Sender wallet is inactive."
                 )
 
-            if not receiver_wallet.is_active:
 
+            if not receiver_wallet.is_active:
                 raise InactiveWalletException(
                     "Receiver wallet is inactive."
                 )
 
-            if sender_wallet.balance < amount:
 
+            if sender_wallet.balance < amount:
                 raise InsufficientBalanceException()
 
-            # 6. Balance Mutations
+
+            # 5. Balance update
 
             sender_wallet.balance -= amount
-
             receiver_wallet.balance += amount
 
             sender_wallet.save()
-
             receiver_wallet.save()
 
-            # 7. Transaction Type Resolution
+
+            # 6. Transaction type resolution
 
             if transaction_type == "TRANSFER":
 
@@ -169,9 +169,10 @@ def transfer_funds(
                         .GROUP_EXPENSE
                     )
 
-            # 8. Immutable Success Entry Creation
 
-            return Transaction.objects.create(
+            # 7. Transaction creation
+
+            txn = Transaction.objects.create(
 
                 initiated_by_user=initiated_by_user,
 
@@ -188,7 +189,86 @@ def transfer_funds(
                 idempotency_key=idempotency_key,
             )
 
-    # 9. Clean Rollback Scopes
+
+            # 8. Receiver notifications
+
+            if receiver_wallet.wallet_type == "PRS":
+
+                receiver_member = (
+                    receiver_wallet
+                    .memberships
+                    .first()
+                )
+
+                if (
+                    receiver_member
+                    and
+                    receiver_member.user != initiated_by_user
+                ):
+
+                    create_notification(
+
+                        user=receiver_member.user,
+
+                        message=(
+                            f"You received ₹{amount} "
+                            f"from {initiated_by_user.username}."
+                        )
+                    )
+
+
+            elif receiver_wallet.wallet_type == "GRP":
+
+                group_members = (
+                    receiver_wallet
+                    .memberships
+                    .exclude(
+                        user=initiated_by_user
+                    )
+                )
+
+                for member in group_members:
+
+                    create_notification(
+
+                        user=member.user,
+
+                        message=(
+                            f"{receiver_wallet.group_name} "
+                            f"received ₹{amount} contribution "
+                            f"from {initiated_by_user.username}."
+                        )
+                    )
+
+
+            # 9. Group spending notification
+
+            if sender_wallet.wallet_type == "GRP":
+
+                group_members = (
+                    sender_wallet
+                    .memberships
+                    .exclude(
+                        user=initiated_by_user
+                    )
+                )
+
+                for member in group_members:
+
+                    create_notification(
+
+                        user=member.user,
+
+                        message=(
+                            f"{initiated_by_user.username} "
+                            f"spent ₹{amount} "
+                            f"from {sender_wallet.group_name}."
+                        )
+                    )
+
+
+            return txn
+
 
     except InsufficientBalanceException:
 
@@ -196,11 +276,13 @@ def transfer_funds(
             "Insufficient balance."
         )
 
+
     except UnauthorizedWalletException:
 
         raise ValidationError(
             "User not authorized for this wallet."
         )
+
 
     except InactiveWalletException as e:
 

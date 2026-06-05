@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from rest_framework.exceptions import ValidationError
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from apps.transactions.models import Transaction

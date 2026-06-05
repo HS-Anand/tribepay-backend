@@ -2,16 +2,15 @@ import random
 import string
 
 from django.db import transaction
-
-from apps.wallets.models import (
-    Wallet,
-    WalletMembership
-)
 from rest_framework.exceptions import ValidationError
 
 from apps.wallets.models import (
+    Wallet,
+    WalletMembership,
     GroupJoinRequest
 )
+
+from apps.notifications.services import create_notification
 
 
 def generate_group_code():
@@ -19,12 +18,8 @@ def generate_group_code():
     while True:
 
         code = "".join(
-
             random.choices(
-
-                string.ascii_uppercase
-                + string.digits,
-
+                string.ascii_uppercase + string.digits,
                 k=6
             )
         )
@@ -34,7 +29,6 @@ def generate_group_code():
         ).exists()
 
         if not exists:
-
             return code
 
 
@@ -66,6 +60,7 @@ def create_group_wallet(
 
     return wallet
 
+
 @transaction.atomic
 def request_join_group(
     user,
@@ -85,6 +80,7 @@ def request_join_group(
             "Invalid group code."
         )
 
+
     already_member = (
         WalletMembership.objects.filter(
             user=user,
@@ -97,6 +93,7 @@ def request_join_group(
         raise ValidationError(
             "You are already a member."
         )
+
 
     existing_request = (
         GroupJoinRequest.objects.filter(
@@ -112,14 +109,40 @@ def request_join_group(
             "Join request already pending."
         )
 
-    join_request = (
-        GroupJoinRequest.objects.create(
-            wallet=wallet,
-            requested_user=user
+
+    join_request = GroupJoinRequest.objects.create(
+
+        wallet=wallet,
+
+        requested_user=user
+    )
+
+
+    owners = (
+        wallet
+        .memberships
+        .filter(
+            role="OWNER"
         )
     )
 
+
+    for owner in owners:
+
+        create_notification(
+
+            user=owner.user,
+
+            message=(
+
+                f"{user.username} requested "
+                f"to join {wallet.group_name}."
+            )
+        )
+
+
     return join_request
+
 
 @transaction.atomic
 def approve_join_request(
@@ -147,6 +170,7 @@ def approve_join_request(
             "Join request not found."
         )
 
+
     is_owner = (
         WalletMembership.objects.filter(
             user=owner_user,
@@ -161,6 +185,7 @@ def approve_join_request(
             "Only owner can approve requests."
         )
 
+
     WalletMembership.objects.create(
 
         user=join_request.requested_user,
@@ -170,11 +195,27 @@ def approve_join_request(
         role="MEMBER"
     )
 
+
     join_request.status = "APPROVED"
 
     join_request.save()
 
+
+    create_notification(
+
+        user=join_request.requested_user,
+
+        message=(
+
+            f"Your request to join "
+            f"{join_request.wallet.group_name} "
+            f"was approved."
+        )
+    )
+
+
     return join_request
+
 
 @transaction.atomic
 def reject_join_request(
@@ -186,12 +227,14 @@ def reject_join_request(
         GroupJoinRequest.objects
         .select_for_update()
         .select_related(
-            "wallet"
+            "wallet",
+            "requested_user"
         )
         .get(
             rid=request_id
         )
     )
+
 
     is_owner = (
         WalletMembership.objects.filter(
@@ -207,17 +250,34 @@ def reject_join_request(
             "Only owner can reject requests."
         )
 
+
     if join_request.status != "PENDING":
 
         raise ValidationError(
             "Request already processed."
         )
 
+
     join_request.status = "REJECTED"
 
     join_request.save()
 
+
+    create_notification(
+
+        user=join_request.requested_user,
+
+        message=(
+
+            f"Your request to join "
+            f"{join_request.wallet.group_name} "
+            f"was rejected."
+        )
+    )
+
+
     return join_request
+
 
 @transaction.atomic
 def leave_group(
@@ -242,7 +302,9 @@ def leave_group(
             "You are not a member."
         )
 
+
     wallet = membership.wallet
+
 
     if membership.role == "OWNER":
 
@@ -258,6 +320,7 @@ def leave_group(
                 "Owner cannot leave while members remain."
             )
 
+
         membership.delete()
 
         wallet.is_active = False
@@ -265,6 +328,7 @@ def leave_group(
         wallet.save()
 
         return "GROUP_CLOSED"
+
 
     membership.delete()
 
@@ -291,6 +355,7 @@ def remove_member(
             "Group not found."
         )
 
+
     is_owner = (
         WalletMembership.objects.filter(
             user=owner_user,
@@ -299,17 +364,20 @@ def remove_member(
         ).exists()
     )
 
+
     if not is_owner:
 
         raise ValidationError(
             "Only owner can remove members."
         )
 
+
     if owner_user.username == username:
 
         raise ValidationError(
             "Use leave group instead."
         )
+
 
     try:
 
@@ -328,12 +396,30 @@ def remove_member(
             "Member not found."
         )
 
+
     if membership.role == "OWNER":
 
         raise ValidationError(
             "Owner cannot be removed."
         )
 
+
+    removed_user = membership.user
+
+
     membership.delete()
+
+
+    create_notification(
+
+        user=removed_user,
+
+        message=(
+
+            f"You were removed from "
+            f"{wallet.group_name}."
+        )
+    )
+
 
     return True

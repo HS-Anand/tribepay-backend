@@ -5,8 +5,10 @@ from apps.invoices.models import CashInvoice
 
 from django.utils import timezone
 
+from apps.notifications.services import create_notification
+
 import uuid
-from apps.wallets.models import Wallet, WalletMembership
+from apps.wallets.models import WalletMembership
 
 from apps.wallets.services.transfer_service import (
     transfer_funds
@@ -47,6 +49,29 @@ def create_invoice(
         description=description,
 
         invoice_type=invoice_type
+    )
+
+    if invoice_type == "REQUEST":
+
+        message = (
+            f"{created_by.username} requested "
+            f"₹{amount} from you."
+        )
+
+
+    elif invoice_type == "EXPENSE":
+
+        message = (
+            f"{created_by.username} added "
+            f"₹{amount} expense for you."
+        )
+
+
+    create_notification(
+
+        user=payer,
+
+        message=message
     )
 
 
@@ -177,6 +202,16 @@ def reject_invoice(
 
     invoice.save(
         update_fields=["status"]
+    )
+
+    create_notification(
+
+        user=invoice.created_by,
+
+        message=(
+            f"{user.username} rejected your "
+            f"₹{invoice.amount} invoice."
+        )
     )
 
 

@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 
 from apps.wallets.models import Wallet
 from apps.transactions.models import Transaction
+from apps.notifications.services import create_notification
 
 
 def add_money(
@@ -34,6 +35,13 @@ def add_money(
             amount=amount,
             transaction_type=Transaction.TransactionType.DEPOSIT,
             status=Transaction.Status.SUCCESS
+        )
+        create_notification(
+            user=user,
+            message=(
+                f"₹{amount} added successfully "
+                f"to your wallet."
+            )
         )
 
         return wallet, transaction_obj

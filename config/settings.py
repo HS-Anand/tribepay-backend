@@ -1,6 +1,5 @@
 from datetime import timedelta
 from pathlib import Path
-from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,6 +28,7 @@ INSTALLED_APPS = [
     "apps.invoices",
     "apps.splits",
     "apps.settlements",
+    "apps.notifications",
 ]
 
 
@@ -157,15 +157,18 @@ CELERY_RESULT_BACKEND = (
 
 CELERY_BEAT_SCHEDULE = {
 
-    "expire-invoices-every-day": {
+    "expire-invoices": {
 
-        "task": (
-            "apps.invoices.tasks.expire_pending_invoices"
-        ),
+        "task": "apps.invoices.tasks.expire_pending_invoices",
 
-        "schedule": crontab(
-            hour=0,
-            minute=0
-        ),
+        "schedule": 3600,
+    },
+
+
+    "invoice-reminders": {
+
+        "task": "apps.invoices.tasks.send_invoice_expiry_reminders",
+
+        "schedule": 3600,
     },
 }

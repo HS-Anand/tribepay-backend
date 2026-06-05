@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from apps.wallets.models import Wallet
 
-from apps.transactions.models import Transaction
 
 
 class WalletSerializer(
