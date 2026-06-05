@@ -11,6 +11,9 @@ from apps.transactions.serializers import (
     TransactionResponseSerializer
 )
 
+from rest_framework.generics import ListAPIView
+
+from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 
 from apps.wallets.services.transfer_service import transfer_funds
@@ -67,23 +70,33 @@ class TransferView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-class TransactionHistoryView(APIView):
+class TransactionHistoryView(ListAPIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [
+        IsAuthenticated
+    ]
 
-    def get(self, request):
+    serializer_class = TransactionResponseSerializer
 
-        transactions = Transaction.objects.filter(
-            sender_wallet__memberships__user=request.user
-        ) | Transaction.objects.filter(
-            receiver_wallet__memberships__user=request.user
+
+    def get_queryset(self):
+
+        return (
+            Transaction.objects
+            .filter(
+
+                Q(
+                    sender_wallet__memberships__user=self.request.user
+                )
+
+                |
+
+                Q(
+                    receiver_wallet__memberships__user=self.request.user
+                )
+            )
+            .distinct()
+            .order_by(
+                "-created_at"
+            )
         )
-
-        transactions = transactions.distinct().order_by("-created_at")
-
-        serializer = TransactionResponseSerializer(
-            transactions,
-            many=True
-        )
-
-        return Response(serializer.data)

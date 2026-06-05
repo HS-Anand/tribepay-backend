@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
-
+from rest_framework.generics import ListAPIView
 from apps.invoices.serializers import (
     CreateInvoiceSerializer,
     InvoiceSerializer,
@@ -191,23 +191,22 @@ class RejectInvoiceView(APIView):
             status=200
         )
     
-class InvoiceListView(APIView):
+class InvoiceListView(ListAPIView):
 
     permission_classes = [
         IsAuthenticated
     ]
 
+    serializer_class = InvoiceSerializer
 
-    def get(
-        self,
-        request
-    ):
 
-        role = request.query_params.get(
+    def get_queryset(self):
+
+        role = self.request.query_params.get(
             "role"
         )
 
-        status = request.query_params.get(
+        status = self.request.query_params.get(
             "status"
         )
 
@@ -215,23 +214,30 @@ class InvoiceListView(APIView):
         if role == "payer":
 
             invoices = CashInvoice.objects.filter(
-                payer=request.user
+                payer=self.request.user
             )
 
 
         elif role == "creator":
 
             invoices = CashInvoice.objects.filter(
-                created_by=request.user
+                created_by=self.request.user
             )
 
 
         else:
 
             invoices = CashInvoice.objects.filter(
-                Q(created_by=request.user)
+
+                Q(
+                    created_by=self.request.user
+                )
+
                 |
-                Q(payer=request.user)
+
+                Q(
+                    payer=self.request.user
+                )
             )
 
 
@@ -242,18 +248,6 @@ class InvoiceListView(APIView):
             )
 
 
-        invoices = invoices.order_by(
+        return invoices.order_by(
             "-created_at"
-        )
-
-
-        serializer = InvoiceSerializer(
-            invoices,
-            many=True
-        )
-
-
-        return Response(
-            serializer.data,
-            status=200
         )

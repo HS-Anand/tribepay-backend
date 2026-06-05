@@ -1,4 +1,4 @@
-from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
@@ -6,39 +6,31 @@ from apps.notifications.models import Notification
 from apps.notifications.serializers import NotificationSerializer
 
 
-class NotificationListView(APIView):
+class NotificationListView(ListAPIView):
 
     permission_classes = [
         IsAuthenticated
     ]
 
+    serializer_class = NotificationSerializer
 
-    def get(self, request):
 
-        notifications = (
+    def get_queryset(self):
+
+        return (
             Notification.objects
             .filter(
-                user=request.user,
+                user=self.request.user,
                 is_read=False
+            )
+            .order_by(
+                "-created_at"
             )
         )
 
 
-        serializer = NotificationSerializer(
 
-            notifications,
-
-            many=True
-        )
-
-
-        return Response(
-            serializer.data
-        )
-
-
-
-class MarkNotificationReadView(APIView):
+class MarkNotificationReadView(ListAPIView):
 
     permission_classes = [
         IsAuthenticated
