@@ -65,4 +65,7 @@ class PayInvoiceSerializer(
 
     invoice_id = serializers.UUIDField()
 
+class RejectInvoiceSerializer(serializers.Serializer):
+
+    invoice_id = serializers.UUIDField()
     

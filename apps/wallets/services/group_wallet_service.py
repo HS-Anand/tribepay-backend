@@ -98,24 +98,34 @@ def request_join_group(
     existing_request = (
         GroupJoinRequest.objects.filter(
             wallet=wallet,
-            requested_user=user,
-            status="PENDING"
-        ).exists()
+            requested_user=user
+        ).first()
     )
 
     if existing_request:
 
-        raise ValidationError(
-            "Join request already pending."
+        if existing_request.status == "PENDING":
+
+            raise ValidationError(
+                "Join request already pending."
+            )
+
+
+        existing_request.status = "PENDING"
+
+        existing_request.save()
+
+        join_request = existing_request
+
+
+    else:
+
+        join_request = GroupJoinRequest.objects.create(
+
+            wallet=wallet,
+
+            requested_user=user
         )
-
-
-    join_request = GroupJoinRequest.objects.create(
-
-        wallet=wallet,
-
-        requested_user=user
-    )
 
 
     owners = (
@@ -142,7 +152,6 @@ def request_join_group(
 
 
     return join_request
-
 
 @transaction.atomic
 def approve_join_request(

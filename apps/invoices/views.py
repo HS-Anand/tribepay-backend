@@ -17,7 +17,8 @@ from apps.invoices.models import CashInvoice
 from apps.invoices.serializers import (
     CreateInvoiceSerializer,
     InvoiceSerializer,
-    PayInvoiceSerializer
+    PayInvoiceSerializer,
+    RejectInvoiceSerializer
 )
 from apps.invoices.services.invoice_service import (
     create_invoice,
@@ -110,18 +111,28 @@ class PayInvoiceView(APIView):
 
 @extend_schema_view(
     post=extend_schema(
-        tags=["Invoices"]
+        tags=["Invoices"],
+        request=RejectInvoiceSerializer
     )
 )
 class RejectInvoiceView(APIView):
 
     permission_classes = [IsAuthenticated]
+    serializer_class = RejectInvoiceSerializer
 
     def post(self, request):
 
+        serializer = RejectInvoiceSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
         invoice = reject_invoice(
             user=request.user,
-            invoice_id=request.data.get("invoice_id")
+            invoice_id=serializer.validated_data["invoice_id"]
         )
 
         return Response(
