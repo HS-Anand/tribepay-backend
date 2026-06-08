@@ -7,6 +7,11 @@ from rest_framework.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_view
+)
+
 from apps.transactions.models import Transaction
 
 from .models import (
@@ -15,8 +20,6 @@ from .models import (
     GroupJoinRequest
 )
 from django.contrib.auth import get_user_model
-
-from .serializers import WalletSerializer
 
 from apps.wallets.services.add_money_service import (
     add_money
@@ -46,6 +49,12 @@ from apps.wallets.serializers import (
 )
 User = get_user_model()
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Wallets"],
+        responses=WalletSerializer
+    )
+)
 class MyWalletsView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -61,6 +70,13 @@ class MyWalletsView(APIView):
         return Response(serializer.data)
     
 
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Wallets"],
+        request=AddMoneySerializer,
+        responses=WalletSerializer
+    )
+)
 class AddMoneyView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -96,6 +112,13 @@ class AddMoneyView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Groups"],
+        request=CreateGroupWalletSerializer,
+        responses=WalletSerializer
+    )
+)
 class CreateGroupWalletView(APIView):
 
     permission_classes = [
@@ -151,6 +174,12 @@ class CreateGroupWalletView(APIView):
             status=status.HTTP_201_CREATED
         )
     
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Groups"],
+        request=JoinGroupSerializer
+    )
+)
 class JoinGroupView(APIView):
 
     permission_classes = [
@@ -205,9 +234,13 @@ class JoinGroupView(APIView):
         )
     
 
-class ApproveJoinRequestView(
-    APIView
-):
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Groups"],
+        request=ApproveJoinRequestSerializer
+    )
+)
+class ApproveJoinRequestView(APIView):
 
     permission_classes = [
         IsAuthenticated
@@ -261,6 +294,12 @@ class ApproveJoinRequestView(
             status=status.HTTP_200_OK
         )
     
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Groups"],
+        responses=MyGroupSerializer
+    )
+)
 class MyGroupsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -293,6 +332,12 @@ class MyGroupsView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Groups"],
+        responses=GroupMemberSerializer
+    )
+)
 class GroupMembersView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -341,6 +386,12 @@ class GroupMembersView(APIView):
             status=status.HTTP_200_OK
         )
     
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Groups"],
+        responses=GroupTransactionSerializer
+    )
+)
 class GroupTransactionsView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -397,9 +448,13 @@ class GroupTransactionsView(APIView):
             status=status.HTTP_200_OK
         )
     
-class PendingJoinRequestsView(
-    APIView
-):
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Groups"],
+        responses=PendingJoinRequestSerializer
+    )
+)
+class PendingJoinRequestsView(APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -457,9 +512,13 @@ class PendingJoinRequestsView(
             serializer.data
         )
     
-class RejectJoinRequestView(
-    APIView
-):
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Groups"],
+        request=ApproveJoinRequestSerializer
+    )
+)
+class RejectJoinRequestView(APIView):
 
     permission_classes = [
         IsAuthenticated
@@ -504,9 +563,13 @@ class RejectJoinRequestView(
             }
         )
     
-class LeaveGroupView(
-    APIView
-):
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Groups"],
+        request=LeaveGroupSerializer
+    )
+)
+class LeaveGroupView(APIView):
 
     permission_classes = [
         IsAuthenticated
@@ -551,9 +614,13 @@ class LeaveGroupView(
         )
 
 
-class RemoveMemberView(
-    APIView
-):
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Groups"],
+        request=RemoveMemberSerializer
+    )
+)
+class RemoveMemberView(APIView):
 
     permission_classes = [
         IsAuthenticated

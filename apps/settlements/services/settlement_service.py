@@ -1,41 +1,61 @@
 import uuid
 from decimal import Decimal
+
 from rest_framework.exceptions import ValidationError
+
 from django.db import transaction
 from django.db.models import Sum
 from django.contrib.auth import get_user_model
+
 from apps.invoices.models import CashInvoice
 from apps.transactions.models import Transaction
 from apps.wallets.models import WalletMembership
 from apps.wallets.services.transfer_service import transfer_funds
 
+
 User = get_user_model()
 
+
 def preview_settlement(user, other_username):
+
     try:
-        other_user = User.objects.get(username=other_username)
+        other_user = User.objects.get(
+            username=other_username
+        )
+
     except User.DoesNotExist:
         raise ValidationError("User not found.")
 
+    if user == other_user:
+        raise ValidationError(
+            "Cannot settle with yourself."
+        )
+
     they_owe = (
-        CashInvoice.objects.filter(
+        CashInvoice.objects
+        .filter(
             created_by=user,
             payer=other_user,
             status="PENDING",
             invoice_type="EXPENSE"
         )
-        .aggregate(total=Sum("amount"))["total"]
+        .aggregate(
+            total=Sum("amount")
+        )["total"]
         or Decimal("0")
     )
 
     you_owe = (
-        CashInvoice.objects.filter(
+        CashInvoice.objects
+        .filter(
             created_by=other_user,
             payer=user,
             status="PENDING",
             invoice_type="EXPENSE"
         )
-        .aggregate(total=Sum("amount"))["total"]
+        .aggregate(
+            total=Sum("amount")
+        )["total"]
         or Decimal("0")
     )
 
@@ -48,6 +68,7 @@ def preview_settlement(user, other_username):
             "direction": "YOU_OWE",
             "can_settle": True
         }
+
     elif net < 0:
         return {
             "user": other_user.username,
@@ -63,12 +84,22 @@ def preview_settlement(user, other_username):
         "can_settle": False
     }
 
+
 @transaction.atomic
 def execute_settlement(user, other_username):
+
     try:
-        other_user = User.objects.get(username=other_username)
+        other_user = User.objects.get(
+            username=other_username
+        )
+
     except User.DoesNotExist:
         raise ValidationError("User not found.")
+
+    if user == other_user:
+        raise ValidationError(
+            "Cannot settle with yourself."
+        )
 
     they_owe_invoices = (
         CashInvoice.objects
@@ -92,22 +123,40 @@ def execute_settlement(user, other_username):
         )
     )
 
-    they_owe = sum(invoice.amount for invoice in they_owe_invoices)
-    you_owe = sum(invoice.amount for invoice in you_owe_invoices)
+    they_owe = sum(
+        invoice.amount
+        for invoice in they_owe_invoices
+    )
+
+    you_owe = sum(
+        invoice.amount
+        for invoice in you_owe_invoices
+    )
+
     net = you_owe - they_owe
 
     if net <= 0:
-        raise ValidationError("You do not owe this user money.")
+        raise ValidationError(
+            "You do not owe this user money."
+        )
 
     sender_wallet = (
-        WalletMembership.objects.select_related("wallet")
-        .get(user=user, wallet__wallet_type="PRS")
+        WalletMembership.objects
+        .select_related("wallet")
+        .get(
+            user=user,
+            wallet__wallet_type="PRS"
+        )
         .wallet
     )
 
     receiver_wallet = (
-        WalletMembership.objects.select_related("wallet")
-        .get(user=other_user, wallet__wallet_type="PRS")
+        WalletMembership.objects
+        .select_related("wallet")
+        .get(
+            user=other_user,
+            wallet__wallet_type="PRS"
+        )
         .wallet
     )
 
@@ -120,7 +169,11 @@ def execute_settlement(user, other_username):
         transaction_type=Transaction.TransactionType.SETTLEMENT
     )
 
-    all_invoices = list(they_owe_invoices) + list(you_owe_invoices)
+    all_invoices = (
+        list(they_owe_invoices)
+        +
+        list(you_owe_invoices)
+    )
 
     for invoice in all_invoices:
         invoice.status = "SETTLED"

@@ -20,6 +20,7 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "corsheaders",
+    "drf_spectacular",
 
     "apps.users",
     "apps.wallets",
@@ -118,6 +119,9 @@ AUTH_USER_MODEL = "users.User"
 
 REST_FRAMEWORK = {
 
+     "DEFAULT_SCHEMA_CLASS":
+        "drf_spectacular.openapi.AutoSchema",
+
     "DEFAULT_AUTHENTICATION_CLASSES": (
 
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -136,6 +140,22 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=10),
 }
 
+SPECTACULAR_SETTINGS = {
+
+    "TITLE": "TribePay API",
+
+    "DESCRIPTION": (
+        "Smart wallet platform with "
+        "group wallets, split expenses, "
+        "settlements and notifications."
+    ),
+
+    "VERSION": "1.0.0",
+
+    "SERVE_INCLUDE_SCHEMA": False,
+
+    "COMPONENT_SPLIT_REQUEST": True,
+}
 
 # IMPORTANT CORS SETTINGS
 

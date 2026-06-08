@@ -1,0 +1,1237 @@
+openapi: 3.0.3
+info:
+  title: TribePay API
+  version: 1.0.0
+  description: Smart wallet platform with group wallets, split expenses, settlements
+    and notifications.
+paths:
+  /api/auth/login/:
+    post:
+      operationId: api_auth_login_create
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/auth/me/:
+    get:
+      operationId: api_auth_me_retrieve
+      tags:
+      - Authentication
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/refresh/:
+    post:
+      operationId: api_auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/auth/signup/:
+    post:
+      operationId: api_auth_signup_create
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/notifications/:
+    get:
+      operationId: api_notifications_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/notifications/{nid}/read/:
+    patch:
+      operationId: api_notifications_read_partial_update
+      parameters:
+      - in: path
+        name: nid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/transactions/history/:
+    get:
+      operationId: api_transactions_history_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Transactions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTransactionResponseList'
+          description: ''
+  /api/transactions/transfer/:
+    get:
+      operationId: api_transactions_transfer_retrieve
+      tags:
+      - Transactions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transfer'
+          description: ''
+    post:
+      operationId: api_transactions_transfer_create
+      tags:
+      - Transactions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+          description: ''
+  /invoices/:
+    get:
+      operationId: invoices_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Invoices
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedInvoiceList'
+          description: ''
+  /invoices/create/:
+    post:
+      operationId: invoices_create_create
+      tags:
+      - Invoices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+          description: ''
+  /invoices/pay/:
+    post:
+      operationId: invoices_pay_create
+      tags:
+      - Invoices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayInvoiceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PayInvoiceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PayInvoiceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+          description: ''
+  /invoices/reject/:
+    post:
+      operationId: invoices_reject_create
+      tags:
+      - Invoices
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /settlements/execute/:
+    post:
+      operationId: settlements_execute_create
+      tags:
+      - Settlements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteSettlementRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExecuteSettlementRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExecuteSettlementRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /settlements/preview/:
+    get:
+      operationId: settlements_preview_retrieve
+      tags:
+      - Settlements
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementPreview'
+          description: ''
+  /splits/:
+    get:
+      operationId: splits_retrieve
+      tags:
+      - Splits
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitPayment'
+          description: ''
+  /splits/create/:
+    post:
+      operationId: splits_create_create
+      tags:
+      - Splits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSplitRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateSplitRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateSplitRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitPayment'
+          description: ''
+  /wallets/add-money/:
+    post:
+      operationId: wallets_add_money_create
+      tags:
+      - Wallets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddMoneyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddMoneyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddMoneyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+          description: ''
+  /wallets/group/{wid}/members/:
+    get:
+      operationId: wallets_group_members_retrieve
+      parameters:
+      - in: path
+        name: wid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Groups
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMember'
+          description: ''
+  /wallets/group/{wid}/requests/:
+    get:
+      operationId: wallets_group_requests_retrieve
+      parameters:
+      - in: path
+        name: wid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Groups
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PendingJoinRequest'
+          description: ''
+  /wallets/group/{wid}/transactions/:
+    get:
+      operationId: wallets_group_transactions_retrieve
+      parameters:
+      - in: path
+        name: wid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Groups
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupTransaction'
+          description: ''
+  /wallets/group/approve/:
+    post:
+      operationId: wallets_group_approve_create
+      tags:
+      - Groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveJoinRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApproveJoinRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApproveJoinRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /wallets/group/create/:
+    post:
+      operationId: wallets_group_create_create
+      tags:
+      - Groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupWalletRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateGroupWalletRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateGroupWalletRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+          description: ''
+  /wallets/group/join/:
+    post:
+      operationId: wallets_group_join_create
+      tags:
+      - Groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinGroupRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JoinGroupRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JoinGroupRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /wallets/group/leave/:
+    post:
+      operationId: wallets_group_leave_create
+      tags:
+      - Groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeaveGroupRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LeaveGroupRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LeaveGroupRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /wallets/group/reject/:
+    post:
+      operationId: wallets_group_reject_create
+      tags:
+      - Groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveJoinRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApproveJoinRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApproveJoinRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /wallets/group/remove-member/:
+    post:
+      operationId: wallets_group_remove_member_create
+      tags:
+      - Groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveMemberRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RemoveMemberRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RemoveMemberRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /wallets/groups/:
+    get:
+      operationId: wallets_groups_retrieve
+      tags:
+      - Groups
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyGroup'
+          description: ''
+  /wallets/me/:
+    get:
+      operationId: wallets_me_retrieve
+      tags:
+      - Wallets
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+          description: ''
+components:
+  schemas:
+    AddMoneyRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+    ApproveJoinRequestRequest:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+      required:
+      - request_id
+    CreateGroupWalletRequest:
+      type: object
+      properties:
+        group_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - group_name
+    CreateInvoiceRequest:
+      type: object
+      properties:
+        payer_username:
+          type: string
+          minLength: 1
+          maxLength: 150
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        description:
+          type: string
+          minLength: 1
+          maxLength: 40
+      required:
+      - amount
+      - description
+      - payer_username
+    CreateSplitRequest:
+      type: object
+      properties:
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        title:
+          type: string
+          maxLength: 50
+        split_type:
+          $ref: '#/components/schemas/SplitTypeEnum'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/SplitMemberInputRequest'
+      required:
+      - members
+      - split_type
+      - total_amount
+    ExecuteSettlementRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+      required:
+      - username
+    GroupMember:
+      type: object
+      properties:
+        username:
+          type: string
+        role:
+          type: string
+      required:
+      - role
+      - username
+    GroupTransaction:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+        sender_wallet_id:
+          type: string
+          format: uuid
+        receiver_wallet_id:
+          type: string
+          format: uuid
+        sender_wallet_type:
+          type: string
+        receiver_wallet_type:
+          type: string
+        initiated_by:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        transaction_type:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - amount
+      - created_at
+      - initiated_by
+      - receiver_wallet_id
+      - receiver_wallet_type
+      - sender_wallet_id
+      - sender_wallet_type
+      - transaction_id
+      - transaction_type
+    Invoice:
+      type: object
+      properties:
+        iid:
+          type: string
+          format: uuid
+          readOnly: true
+        created_by:
+          type: string
+        payer:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        description:
+          type: string
+          maxLength: 40
+        invoice_type:
+          $ref: '#/components/schemas/InvoiceTypeEnum'
+        status:
+          $ref: '#/components/schemas/InvoiceStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - amount
+      - created_at
+      - created_by
+      - description
+      - iid
+      - payer
+    InvoiceStatusEnum:
+      enum:
+      - PENDING
+      - PAID
+      - REJECTED
+      - EXPIRED
+      - SETTLED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `PAID` - Paid
+        * `REJECTED` - Rejected
+        * `EXPIRED` - Expired
+        * `SETTLED` - Settled
+    InvoiceTypeEnum:
+      enum:
+      - REQUEST
+      - EXPENSE
+      type: string
+      description: |-
+        * `REQUEST` - Request
+        * `EXPENSE` - Expense
+    JoinGroupRequest:
+      type: object
+      properties:
+        group_code:
+          type: string
+          minLength: 1
+          maxLength: 6
+      required:
+      - group_code
+    LeaveGroupRequest:
+      type: object
+      properties:
+        group_id:
+          type: string
+          format: uuid
+      required:
+      - group_id
+    LoginRequest:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - phone_number
+    MyGroup:
+      type: object
+      properties:
+        wid:
+          type: string
+          format: uuid
+        group_name:
+          type: string
+        group_code:
+          type: string
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        role:
+          type: string
+        members_count:
+          type: integer
+      required:
+      - balance
+      - group_code
+      - group_name
+      - members_count
+      - role
+      - wid
+    Notification:
+      type: object
+      properties:
+        nid:
+          type: string
+          format: uuid
+          readOnly: true
+        message:
+          type: string
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - message
+      - nid
+    PaginatedInvoiceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invoice'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedTransactionResponseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionResponse'
+    PayInvoiceRequest:
+      type: object
+      properties:
+        invoice_id:
+          type: string
+          format: uuid
+      required:
+      - invoice_id
+    PendingJoinRequest:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        status:
+          type: string
+      required:
+      - request_id
+      - status
+      - username
+    RemoveMemberRequest:
+      type: object
+      properties:
+        group_id:
+          type: string
+          format: uuid
+        username:
+          type: string
+          minLength: 1
+      required:
+      - group_id
+      - username
+    SettlementPreview:
+      type: object
+      properties:
+        user:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        direction:
+          type: string
+        can_settle:
+          type: boolean
+      required:
+      - amount
+      - can_settle
+      - direction
+      - user
+    SignupRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 15
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - confirm_password
+      - password
+      - phone_number
+    SplitMember:
+      type: object
+      properties:
+        username:
+          type: string
+        share_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        is_payer:
+          type: boolean
+        invoice:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - share_amount
+      - username
+    SplitMemberInputRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - username
+    SplitPayment:
+      type: object
+      properties:
+        sid:
+          type: string
+          format: uuid
+          readOnly: true
+        created_by:
+          type: string
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        title:
+          type: string
+          maxLength: 50
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/SplitMember'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - created_by
+      - members
+      - sid
+      - total_amount
+    SplitTypeEnum:
+      enum:
+      - EQUAL
+      - CUSTOM
+      type: string
+      description: |-
+        * `EQUAL` - EQUAL
+        * `CUSTOM` - CUSTOM
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    TransactionResponse:
+      type: object
+      properties:
+        tid:
+          type: string
+          format: uuid
+          readOnly: true
+        transaction_type:
+          $ref: '#/components/schemas/TransactionTypeEnum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        status:
+          $ref: '#/components/schemas/TransactionResponseStatusEnum'
+        sender_wallet:
+          type: string
+          format: uuid
+        receiver_wallet:
+          type: string
+          format: uuid
+        sender_username:
+          type: string
+          readOnly: true
+        receiver_username:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - created_at
+      - receiver_username
+      - receiver_wallet
+      - sender_username
+      - sender_wallet
+      - tid
+    TransactionResponseStatusEnum:
+      enum:
+      - PENDING
+      - SUCCESS
+      - FAILED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `SUCCESS` - Success
+        * `FAILED` - Failed
+    TransactionTypeEnum:
+      enum:
+      - TRANSFER
+      - DEPOSIT
+      - GROUP_CONTRIBUTION
+      - GROUP_EXPENSE
+      - WITHDRAWAL
+      - SETTLEMENT
+      type: string
+      description: |-
+        * `TRANSFER` - Transfer
+        * `DEPOSIT` - Deposit
+        * `GROUP_CONTRIBUTION` - Group Contribution
+        * `GROUP_EXPENSE` - Group Expense
+        * `WITHDRAWAL` - Withdrawal
+        * `SETTLEMENT` - Settlement
+    Transfer:
+      type: object
+      properties:
+        sender_wallet_id:
+          type: string
+          format: uuid
+        receiver_wallet_id:
+          type: string
+          format: uuid
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        idempotency_key:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - amount
+      - receiver_wallet_id
+      - sender_wallet_id
+    TransferRequest:
+      type: object
+      properties:
+        sender_wallet_id:
+          type: string
+          format: uuid
+        receiver_wallet_id:
+          type: string
+          format: uuid
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        idempotency_key:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - amount
+      - receiver_wallet_id
+      - sender_wallet_id
+    Wallet:
+      type: object
+      properties:
+        wid:
+          type: string
+          format: uuid
+          readOnly: true
+        wallet_type:
+          $ref: '#/components/schemas/WalletTypeEnum'
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - updated_at
+      - wallet_type
+      - wid
+    WalletTypeEnum:
+      enum:
+      - PRS
+      - GRP
+      - OFN
+      type: string
+      description: |-
+        * `PRS` - Personal
+        * `GRP` - Group
+        * `OFN` - Offline
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
