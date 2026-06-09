@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.throttling import AnonRateThrottle
 
 from drf_spectacular.utils import (
     extend_schema,
@@ -77,6 +78,9 @@ class MeView(APIView):
     )
 )
 class LoginView(APIView):
+    throttle_classes = [
+        AnonRateThrottle
+    ]
 
     def post(self, request):
 
