@@ -14,4 +14,3 @@ db.sqlite3
 .pytest_cache/
 
 celerybeat-schedule
-celerybeat.pid
