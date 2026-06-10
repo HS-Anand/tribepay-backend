@@ -11,7 +11,8 @@ from .views import (
     GroupTransactionsView,
     PendingJoinRequestsView,
     RejectJoinRequestView,
-    RemoveMemberView
+    RemoveMemberView,
+    SmartPaymentView
 )
 
 
@@ -28,4 +29,5 @@ urlpatterns = [
     path("group/reject/", RejectJoinRequestView.as_view()),
     path("group/leave/",LeaveGroupView.as_view()),
     path("group/remove-member/",RemoveMemberView.as_view()),
+    path("smart-payment/", SmartPaymentView.as_view(), name="smart-payment"),
 ]

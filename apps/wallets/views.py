@@ -21,6 +21,8 @@ from .models import (
 )
 from django.contrib.auth import get_user_model
 
+from apps.wallets.services.smart_payment_service import smart_payment
+
 from apps.wallets.services.add_money_service import (
     add_money
 )
@@ -45,7 +47,8 @@ from apps.wallets.serializers import (
     GroupTransactionSerializer,
     PendingJoinRequestSerializer,
     LeaveGroupSerializer,
-    RemoveMemberSerializer
+    RemoveMemberSerializer,
+    SmartPaymentSerializer
 )
 User = get_user_model()
 
@@ -656,4 +659,88 @@ class RemoveMemberView(APIView):
                 "message":
                 "Member removed successfully."
             }
+        )
+    
+@extend_schema(
+    tags=["Smart Payment"],
+    request=SmartPaymentSerializer
+)
+class SmartPaymentView(APIView):
+
+    permission_classes = [
+        IsAuthenticated
+    ]
+
+    def post(self, request):
+
+        serializer = SmartPaymentSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        data = serializer.validated_data
+
+
+        receiver = User.objects.get(
+            username=data["receiver_username"]
+        )
+
+
+        sender_wallet = Wallet.objects.get(
+            wallet_type="PRS",
+            memberships__user=request.user
+        )
+
+
+        receiver_wallet = Wallet.objects.get(
+            wallet_type="PRS",
+            memberships__user=receiver
+        )
+
+
+        result = smart_payment(
+            initiated_by_user=request.user,
+
+            sender_wallet_id=sender_wallet.wid,
+
+            receiver_wallet_id=receiver_wallet.wid,
+
+            amount=data["amount"],
+
+            is_split=data.get(
+                "is_split",
+                False
+            ),
+
+            split_type=data.get(
+                "split_type"
+            ),
+
+            split_title=data.get(
+                "split_title"
+            ),
+
+            members=data.get(
+                "members"
+            )
+        )
+
+
+        return Response(
+            {
+                "message": "Payment successful",
+
+                "transaction_id": str(
+                    result["transaction"].tid
+                ),
+
+                "split_created": (
+                    result["split"] is not None
+                )
+            },
+
+            status=status.HTTP_200_OK
         )

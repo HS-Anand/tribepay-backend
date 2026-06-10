@@ -1,5 +1,5 @@
 from decimal import Decimal
-
+import uuid
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
@@ -31,6 +31,8 @@ def transfer_funds(
     idempotency_key=None,
     transaction_type="TRANSFER"
 ):
+    if idempotency_key is None:
+        idempotency_key = str(uuid.uuid4())
 
     amount = Decimal(amount)
 

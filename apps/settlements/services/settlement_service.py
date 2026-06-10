@@ -165,7 +165,6 @@ def execute_settlement(user, other_username):
         receiver_wallet_id=receiver_wallet.wid,
         amount=net,
         initiated_by_user=user,
-        idempotency_key=str(uuid.uuid4()),
         transaction_type=Transaction.TransactionType.SETTLEMENT
     )
 

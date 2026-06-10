@@ -89,3 +89,7 @@ Test cases:
     Does: Ensures repeated Celery runs do not send duplicate reminders
     App: invoices (Celery)
 
+16. test_smart_payment_with_split_atomic_workflow
+    Print: TEST: SMART PAYMENT ATOMIC WORKFLOW
+    Does: Ensures split cash invoice feature works with personal payments in one atomic transfer
+    App: wallets

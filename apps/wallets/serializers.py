@@ -163,3 +163,44 @@ class RemoveMemberSerializer(
     group_id = serializers.UUIDField()
 
     username = serializers.CharField()
+
+
+class SmartPaymentMemberSerializer(serializers.Serializer):
+
+    username = serializers.CharField()
+
+    amount = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        required=False
+    )
+
+class SmartPaymentSerializer(serializers.Serializer):
+
+    receiver_username = serializers.CharField()
+
+    amount = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2
+    )
+
+    is_split = serializers.BooleanField(
+        default=False
+    )
+
+    split_title = serializers.CharField(
+        required=False
+    )
+
+    split_type = serializers.ChoiceField(
+        choices=[
+            "EQUAL",
+            "CUSTOM"
+        ],
+        required=False
+    )
+
+    members = SmartPaymentMemberSerializer(
+        many=True,
+        required=False
+    )
