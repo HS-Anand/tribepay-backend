@@ -236,41 +236,34 @@ SIMPLE_JWT = {
 
 SPECTACULAR_SETTINGS = {
 
-    "TITLE":
+    "TITLE": "TribePay API",
 
-        "TribePay API",
+    "DESCRIPTION": """
+**Your tribe. Your money. Together.**
 
+A fintech backend system for collaborative payments, featuring:
+* **Wallets:** Individual digital accounts and shared group (tribe) pools.
+* **Tribes:** Shared wallet spaces with member-based collaboration.
+* **Transfers:** Peer-to-peer (P2P) transaction-safe money movements.
+* **Payments:** Smart payment splitting and invoice-based requests.
+* **Settlements:** Optimized bilateral balance reconciliation between users.
 
-    "DESCRIPTION": (
-        "**Your tribe. Your money. Together.**\n\n"
-
-        "A fintech backend system featuring "
-        "digital wallets, peer-to-peer transfers, "
-        "group payments, smart expense splitting, "
-        "invoice-based payment requests, and settlements.\n\n"
-
-        "Built with transaction-safe money movement, "
-        "concurrency handling, idempotency protection, "
-        "asynchronous processing, and notification workflows.\n\n"
-
-        "*TribePay handles your tribe's money matters, "
-        "while you build relationships.*"
-    ),
+Engineering Focus
+* **Architecture:** Service-layer design with separated business logic and RESTful APIs.
+* **Reliability:** Transaction-safe operations along with idempotency safeguards and automated test coverage.
+* **Consistency:** Concurrency control using database transactions and row-level locking.
+* **Security:** JWT authentication with API access controls and request throttling.
+* **Automation:** Asynchronous processing with scheduled background workflows.
 
 
-    "VERSION":
+*TribePay handles your tribe's money matters, while you build relationships.*
+    """,
 
-        "2.1.0",
+    "VERSION": "2.1.0",
 
+    "SERVE_INCLUDE_SCHEMA": False,
 
-    "SERVE_INCLUDE_SCHEMA":
-
-        False,
-
-
-    "COMPONENT_SPLIT_REQUEST":
-
-        True,
+    "COMPONENT_SPLIT_REQUEST": True,
 }
 
 
