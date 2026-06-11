@@ -1,5 +1,5 @@
 import os
-
+import dj_database_url
 from datetime import timedelta
 from pathlib import Path
 
@@ -65,6 +65,8 @@ MIDDLEWARE = [
 
     "django.middleware.security.SecurityMiddleware",
 
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
 
     "django.middleware.common.CommonMiddleware",
@@ -117,35 +119,21 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
 
-    "default": {
+    "default": dj_database_url.config(
 
-        "ENGINE": "django.db.backends.postgresql",
+        default=(
 
-        "NAME": os.environ.get(
-            "POSTGRES_DB",
-            "groupwallet"
+            f"postgres://"
+            f"{os.environ.get('POSTGRES_USER','harkarananand')}:"
+            f"{os.environ.get('POSTGRES_PASSWORD','your_password')}"
+            f"@{os.environ.get('POSTGRES_HOST','localhost')}:"
+            f"{os.environ.get('POSTGRES_PORT','5432')}/"
+            f"{os.environ.get('POSTGRES_DB','groupwallet')}"
+
         ),
 
-        "USER": os.environ.get(
-            "POSTGRES_USER",
-            "harkarananand"
-        ),
-
-        "PASSWORD": os.environ.get(
-            "POSTGRES_PASSWORD",
-            "your_password"
-        ),
-
-        "HOST": os.environ.get(
-            "POSTGRES_HOST",
-            "localhost"
-        ),
-
-        "PORT": os.environ.get(
-            "POSTGRES_PORT",
-            "5432"
-        ),
-    }
+        conn_max_age=600,
+    )
 }
 
 
@@ -189,6 +177,14 @@ USE_TZ = True
 
 
 STATIC_URL = "static/"
+
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
+STATICFILES_STORAGE = (
+    "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
 
 
 
