@@ -1,16 +1,42 @@
+import os
+
 from datetime import timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-t==il+az0bb42vt7xp%g630wjrqiq7m24+enae5qxifnzin4_5"
 
-DEBUG = True
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
-ALLOWED_HOSTS = ["*"]
+
+DEBUG = (
+    os.environ.get(
+        "DEBUG",
+        "False"
+    )
+    ==
+    "True"
+)
+
+
+ALLOWED_HOSTS = (
+    os.environ.get(
+        "ALLOWED_HOSTS",
+        "localhost,127.0.0.1"
+    )
+    .split(",")
+)
+
 
 
 INSTALLED_APPS = [
+
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -18,9 +44,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+
     "rest_framework",
-    "corsheaders",
     "drf_spectacular",
+
 
     "apps.users",
     "apps.wallets",
@@ -33,8 +60,8 @@ INSTALLED_APPS = [
 ]
 
 
+
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
 
     "django.middleware.security.SecurityMiddleware",
 
@@ -52,75 +79,131 @@ MIDDLEWARE = [
 ]
 
 
+
 ROOT_URLCONF = "config.urls"
 
+
+
 TEMPLATES = [
+
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
+
+        "BACKEND":
+            "django.template.backends.django.DjangoTemplates",
+
         "DIRS": [],
+
         "APP_DIRS": True,
+
         "OPTIONS": {
+
             "context_processors": [
+
                 "django.template.context_processors.request",
+
                 "django.contrib.auth.context_processors.auth",
+
                 "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
+
+
 WSGI_APPLICATION = "config.wsgi.application"
 
 
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'groupwallet',
-        'USER': 'harkarananand',
-        'PASSWORD': 'your_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
+
+    "default": {
+
+        "ENGINE": "django.db.backends.postgresql",
+
+        "NAME": os.environ.get(
+            "POSTGRES_DB",
+            "groupwallet"
+        ),
+
+        "USER": os.environ.get(
+            "POSTGRES_USER",
+            "harkarananand"
+        ),
+
+        "PASSWORD": os.environ.get(
+            "POSTGRES_PASSWORD",
+            "your_password"
+        ),
+
+        "HOST": os.environ.get(
+            "POSTGRES_HOST",
+            "localhost"
+        ),
+
+        "PORT": os.environ.get(
+            "POSTGRES_PORT",
+            "5432"
+        ),
     }
 }
 
 
+
 AUTH_PASSWORD_VALIDATORS = [
+
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
+
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
+
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
+
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 
+
 LANGUAGE_CODE = "en-us"
+
 
 TIME_ZONE = "UTC"
 
+
 USE_I18N = True
 
+
 USE_TZ = True
+
 
 
 STATIC_URL = "static/"
 
 
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 
 AUTH_USER_MODEL = "users.User"
 
 
+
 REST_FRAMEWORK = {
 
-     "DEFAULT_SCHEMA_CLASS":
+    "DEFAULT_SCHEMA_CLASS":
         "drf_spectacular.openapi.AutoSchema",
+
 
     "DEFAULT_AUTHENTICATION_CLASSES": (
 
@@ -128,80 +211,100 @@ REST_FRAMEWORK = {
 
     ),
 
+
     "DEFAULT_PAGINATION_CLASS":
 
         "rest_framework.pagination.PageNumberPagination",
 
+
     "PAGE_SIZE": 10,
 
+
     "DEFAULT_THROTTLE_RATES": {
+
         "anon": "5/min",
+
     }
 }
 
 
+
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=10),
+
+    "ACCESS_TOKEN_LIFETIME":
+
+        timedelta(hours=10),
+
 }
+
+
 
 SPECTACULAR_SETTINGS = {
 
-    "TITLE": "TribePay API",
+    "TITLE":
 
-    "DESCRIPTION": (
-        "Smart wallet platform with "
-        "group wallets, split expenses, "
-        "settlements and notifications."
-    ),
+        "TribePay API",
 
-    "VERSION": "1.0.0",
 
-    "SERVE_INCLUDE_SCHEMA": False,
+    "DESCRIPTION":
 
-    "COMPONENT_SPLIT_REQUEST": True,
+        (
+            "Smart wallet platform with "
+            "group wallets, split expenses, "
+            "settlements and notifications."
+        ),
+
+
+    "VERSION":
+
+        "1.0.0",
+
+
+    "SERVE_INCLUDE_SCHEMA":
+
+        False,
+
+
+    "COMPONENT_SPLIT_REQUEST":
+
+        True,
 }
 
-# IMPORTANT CORS SETTINGS
 
-CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5173",
-    "http://localhost:5173",
-
-    "http://127.0.0.1:5174",
-    "http://localhost:5174",
-]
-
-CELERY_BROKER_URL = (
-
+REDIS_URL = os.environ.get(
+    "REDIS_URL",
     "redis://localhost:6379/0"
-
 )
 
 
-CELERY_RESULT_BACKEND = (
 
-    "redis://localhost:6379/0"
+CELERY_BROKER_URL = REDIS_URL
 
-)
+
+CELERY_RESULT_BACKEND = REDIS_URL
+
+
 
 CELERY_BEAT_SCHEDULE = {
 
+
     "expire-invoices": {
 
-        "task": "apps.invoices.tasks.expire_pending_invoices",
+        "task":
+            "apps.invoices.tasks.expire_pending_invoices",
 
-        "schedule": 3600,
+        "schedule":
+            3600,
     },
 
 
     "invoice-reminders": {
 
-        "task": "apps.invoices.tasks.send_invoice_expiry_reminders",
+        "task":
+            "apps.invoices.tasks.send_invoice_expiry_reminders",
 
-        "schedule": 3600,
+        "schedule":
+            3600,
     },
 }
