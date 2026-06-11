@@ -234,7 +234,6 @@ SIMPLE_JWT = {
 }
 
 
-
 SPECTACULAR_SETTINGS = {
 
     "TITLE":
@@ -242,18 +241,26 @@ SPECTACULAR_SETTINGS = {
         "TribePay API",
 
 
-    "DESCRIPTION":
+    "DESCRIPTION": (
+        "**Your tribe. Your money. Together.**\n\n"
 
-        (
-            "Smart wallet platform with "
-            "group wallets, split expenses, "
-            "settlements and notifications."
-        ),
+        "A fintech backend system featuring "
+        "digital wallets, peer-to-peer transfers, "
+        "group payments, smart expense splitting, "
+        "invoice-based payment requests, and settlements.\n\n"
+
+        "Built with transaction-safe money movement, "
+        "concurrency handling, idempotency protection, "
+        "asynchronous processing, and notification workflows.\n\n"
+
+        "*TribePay handles your tribe's money matters, "
+        "while you build relationships.*"
+    ),
 
 
     "VERSION":
 
-        "1.0.0",
+        "2.1.0",
 
 
     "SERVE_INCLUDE_SCHEMA":
