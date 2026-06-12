@@ -62,13 +62,11 @@ class SettlementTest(TestCase):
             role="OWNER"
         )
     
-    
     def test_settlement_net_calculation(self):
 
         print(
             "\n\n===== TEST: SETTLEMENT NET CALCULATION ====="
         )
-
 
         CashInvoice.objects.create(
             created_by=self.user1,
@@ -79,7 +77,6 @@ class SettlementTest(TestCase):
             invoice_type="EXPENSE"
         )
 
-
         CashInvoice.objects.create(
             created_by=self.user1,
             payer=self.user2,
@@ -88,7 +85,6 @@ class SettlementTest(TestCase):
             status="PENDING",
             invoice_type="EXPENSE"
         )
-
 
         CashInvoice.objects.create(
             created_by=self.user2,
@@ -99,36 +95,22 @@ class SettlementTest(TestCase):
             invoice_type="EXPENSE"
         )
 
-
         result = preview_settlement(
             user=self.user2,
             other_username=self.user1.username
         )
 
+        self.assertEqual(result["amount"], Decimal("1600.00"))
 
-        self.assertEqual(
-            result["amount"],
-            Decimal("1600.00")
-        )
+        self.assertEqual(result["direction"], "YOU_OWE")
 
-
-        self.assertEqual(
-            result["direction"],
-            "YOU_OWE"
-        )
-
-
-        self.assertTrue(
-            result["can_settle"]
-        )
-
+        self.assertTrue(result["can_settle"])
 
     def test_execute_settlement_updates_expense_invoices_only(self):
 
         print(
             "\n\n===== TEST: SETTLEMENT EXECUTION CONSISTENCY + REQUESTS UNTOUCHED ====="
         )
-
 
         expense1 = CashInvoice.objects.create(
             created_by=self.user1,
@@ -139,7 +121,6 @@ class SettlementTest(TestCase):
             invoice_type="EXPENSE"
         )
 
-
         expense2 = CashInvoice.objects.create(
             created_by=self.user1,
             payer=self.user2,
@@ -148,7 +129,6 @@ class SettlementTest(TestCase):
             status="PENDING",
             invoice_type="EXPENSE"
         )
-
 
         request_invoice = CashInvoice.objects.create(
             created_by=self.user1,
@@ -159,51 +139,25 @@ class SettlementTest(TestCase):
             invoice_type="REQUEST"
         )
 
-
         txn = execute_settlement(
             user=self.user2,
             other_username=self.user1.username
         )
 
-
         expense1.refresh_from_db()
         expense2.refresh_from_db()
         request_invoice.refresh_from_db()
 
+        self.assertEqual(expense1.status, "SETTLED")
 
-        self.assertEqual(
-            expense1.status,
-            "SETTLED"
-        )
+        self.assertEqual(expense2.status, "SETTLED")
 
-        self.assertEqual(
-            expense2.status,
-            "SETTLED"
-        )
+        self.assertEqual(expense1.transaction, txn)
 
+        self.assertEqual(expense2.transaction, txn)
 
-        self.assertEqual(
-            expense1.transaction,
-            txn
-        )
+        self.assertEqual(request_invoice.status, "PENDING")
 
-        self.assertEqual(
-            expense2.transaction,
-            txn
-        )
+        self.assertIsNone(request_invoice.transaction)
 
-
-        self.assertEqual(
-            request_invoice.status,
-            "PENDING"
-        )
-
-        self.assertIsNone(
-            request_invoice.transaction
-        )
-
-
-        self.assertEqual(
-            Transaction.objects.count(),
-            1
-        )
+        self.assertEqual(Transaction.objects.count(), 1)

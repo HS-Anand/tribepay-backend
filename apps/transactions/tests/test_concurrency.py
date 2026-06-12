@@ -39,7 +39,6 @@ class TransferConcurrencyTest(TransactionTestCase):
             password="1234"
         )
 
-
         self.wallet1 = Wallet.objects.create(
             wallet_type="PRS",
             balance=Decimal("1000.00")
@@ -49,7 +48,6 @@ class TransferConcurrencyTest(TransactionTestCase):
             wallet_type="PRS",
             balance=Decimal("0.00")
         )
-
 
         WalletMembership.objects.create(
             user=self.user1,
@@ -63,16 +61,13 @@ class TransferConcurrencyTest(TransactionTestCase):
             role="OWNER"
         )
 
-
     def test_concurrent_double_spend_prevention(self):
 
         print(
             "\n\n===== TEST: CONCURRENT DOUBLE SPEND PREVENTION ====="
         )
 
-
         errors = []
-
 
         def attempt_transfer():
 
@@ -91,7 +86,7 @@ class TransferConcurrencyTest(TransactionTestCase):
                 errors.append(e)
 
             finally:
-                connection.close() 
+                connection.close()
 
         thread1 = threading.Thread(
             target=attempt_transfer
@@ -101,38 +96,19 @@ class TransferConcurrencyTest(TransactionTestCase):
             target=attempt_transfer
         )
 
-
         thread1.start()
         thread2.start()
-
 
         thread1.join()
         thread2.join()
 
-
         self.wallet1.refresh_from_db()
         self.wallet2.refresh_from_db()
 
+        self.assertEqual(Transaction.objects.count(), 1)
 
-        self.assertEqual(
-            Transaction.objects.count(),
-            1
-        )
+        self.assertEqual(len(errors), 1)
 
+        self.assertEqual(self.wallet1.balance, Decimal("200.00"))
 
-        self.assertEqual(
-            len(errors),
-            1
-        )
-
-
-        self.assertEqual(
-            self.wallet1.balance,
-            Decimal("200.00")
-        )
-
-
-        self.assertEqual(
-            self.wallet2.balance,
-            Decimal("800.00")
-        )
+        self.assertEqual(self.wallet2.balance, Decimal("800.00"))

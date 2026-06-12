@@ -10,13 +10,8 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
 
         fields = [
-
             "nid",
-
             "message",
-
             "is_read",
-
             "created_at"
-
         ]

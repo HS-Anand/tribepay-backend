@@ -9,7 +9,6 @@ from apps.invoices.models import CashInvoice
 from apps.notifications.services import create_notification
 
 
-
 @shared_task
 def expire_pending_invoices():
 
@@ -25,9 +24,7 @@ def expire_pending_invoices():
         )
     )
 
-
     count = 0
-
 
     for invoice in invoices:
 
@@ -37,26 +34,18 @@ def expire_pending_invoices():
             update_fields=["status"]
         )
 
-
         create_notification(
-
             user=invoice.payer,
-
             message=(
-
                 f"Your invoice of ₹{invoice.amount} "
                 f"from {invoice.created_by.username} "
                 f"has expired."
             )
         )
 
-
         create_notification(
-
             user=invoice.created_by,
-
             message=(
-
                 f"Your invoice request of "
                 f"₹{invoice.amount} to "
                 f"{invoice.payer.username} "
@@ -64,15 +53,9 @@ def expire_pending_invoices():
             )
         )
 
-
         count += 1
 
-
-    return (
-        f"{count} invoices expired."
-    )
-
-
+    return f"{count} invoices expired."
 
 
 @shared_task
@@ -80,12 +63,7 @@ def send_invoice_expiry_reminders():
 
     now = timezone.now()
 
-    reminder_limit = (
-        now
-        +
-        timedelta(days=1)
-    )
-
+    reminder_limit = now + timedelta(days=1)
 
     invoices = (
         CashInvoice.objects
@@ -101,18 +79,13 @@ def send_invoice_expiry_reminders():
         )
     )
 
-
     count = 0
-
 
     for invoice in invoices:
 
         create_notification(
-
             user=invoice.payer,
-
             message=(
-
                 f"Reminder: Your invoice of "
                 f"₹{invoice.amount} from "
                 f"{invoice.created_by.username} "
@@ -120,13 +93,9 @@ def send_invoice_expiry_reminders():
             )
         )
 
-
         create_notification(
-
             user=invoice.created_by,
-
             message=(
-
                 f"Reminder: Your invoice request "
                 f"of ₹{invoice.amount} to "
                 f"{invoice.payer.username} "
@@ -134,17 +103,12 @@ def send_invoice_expiry_reminders():
             )
         )
 
-
         CashInvoice.objects.filter(
             iid=invoice.iid
         ).update(
             reminder_sent=True
         )
 
-
         count += 1
 
-
-    return (
-        f"{count} invoice reminders sent."
-    )
+    return f"{count} invoice reminders sent."

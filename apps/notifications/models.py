@@ -12,40 +12,25 @@ class Notification(models.Model):
         editable=False
     )
 
-
     user = models.ForeignKey(
-
         settings.AUTH_USER_MODEL,
-
         on_delete=models.CASCADE,
-
         related_name="notifications"
     )
 
-
     message = models.TextField()
 
-
     is_read = models.BooleanField(
-
         default=False
     )
 
-
     created_at = models.DateTimeField(
-
         auto_now_add=True
     )
 
-
     class Meta:
 
-        ordering = [
-
-            "-created_at"
-
-        ]
-
+        ordering = ["-created_at"]
 
     def __str__(self):
 

@@ -19,6 +19,7 @@ from .views import (
 urlpatterns = [
     path("me/", MyWalletsView.as_view()),
     path("add-money/", AddMoneyView.as_view()),
+
     path("group/create/",CreateGroupWalletView.as_view()),
     path("group/join/",JoinGroupView.as_view()),
     path("group/approve/",ApproveJoinRequestView.as_view()),
@@ -29,5 +30,6 @@ urlpatterns = [
     path("group/reject/", RejectJoinRequestView.as_view()),
     path("group/leave/",LeaveGroupView.as_view()),
     path("group/remove-member/",RemoveMemberView.as_view()),
+    
     path("smart-payment/", SmartPaymentView.as_view(), name="smart-payment"),
 ]

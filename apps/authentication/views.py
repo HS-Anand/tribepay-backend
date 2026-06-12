@@ -26,7 +26,7 @@ from .serializers import (
     )
 )
 class SignupView(APIView):
-
+    
     def post(self, request):
 
         serializer = SignupSerializer(data=request.data)
@@ -78,9 +78,7 @@ class MeView(APIView):
     )
 )
 class LoginView(APIView):
-    throttle_classes = [
-        AnonRateThrottle
-    ]
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
 

@@ -3,9 +3,7 @@ from rest_framework import serializers
 from apps.invoices.models import CashInvoice
 
 
-class CreateInvoiceSerializer(
-    serializers.Serializer
-):
+class CreateInvoiceSerializer(serializers.Serializer):
 
     payer_username = serializers.CharField(
         max_length=150
@@ -21,9 +19,7 @@ class CreateInvoiceSerializer(
     )
 
 
-class InvoiceSerializer(
-    serializers.ModelSerializer
-):
+class InvoiceSerializer(serializers.ModelSerializer):
 
     created_by = serializers.CharField(
         source="created_by.username"
@@ -33,39 +29,28 @@ class InvoiceSerializer(
         source="payer.username"
     )
 
-
     class Meta:
 
         model = CashInvoice
 
         fields = [
-
             "iid",
-
             "created_by",
-
             "payer",
-
             "amount",
-
             "description",
-
             "invoice_type",
-
             "status",
-
             "created_at",
-
             "paid_at",
         ]
 
-class PayInvoiceSerializer(
-    serializers.Serializer
-):
+
+class PayInvoiceSerializer(serializers.Serializer):
 
     invoice_id = serializers.UUIDField()
+
 
 class RejectInvoiceSerializer(serializers.Serializer):
 
     invoice_id = serializers.UUIDField()
-    

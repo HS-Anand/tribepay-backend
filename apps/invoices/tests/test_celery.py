@@ -33,13 +33,11 @@ class InvoiceCeleryTest(TestCase):
             password="1234"
         )
 
-
     def test_expired_invoices_are_marked_expired(self):
 
         print(
             "\n\n===== TEST: CELERY INVOICE EXPIRY CORRECTNESS ====="
         )
-
 
         invoice = CashInvoice.objects.create(
             created_by=self.creator,
@@ -50,25 +48,19 @@ class InvoiceCeleryTest(TestCase):
             expires_at=timezone.now() - timedelta(days=1)
         )
 
-
         result = expire_pending_invoices()
 
-
         invoice.refresh_from_db()
-
 
         self.assertEqual(
             invoice.status,
             "EXPIRED"
         )
 
-
         self.assertEqual(
             result,
             "1 invoices expired."
         )
-
-
 
     @patch(
         "apps.invoices.tasks.create_notification"
@@ -82,7 +74,6 @@ class InvoiceCeleryTest(TestCase):
             "\n\n===== TEST: CELERY REMINDER IDEMPOTENCY ====="
         )
 
-
         invoice = CashInvoice.objects.create(
             created_by=self.creator,
             payer=self.payer,
@@ -93,31 +84,24 @@ class InvoiceCeleryTest(TestCase):
             reminder_sent=False
         )
 
-
         first_run = send_invoice_expiry_reminders()
-
         second_run = send_invoice_expiry_reminders()
 
-
         invoice.refresh_from_db()
-
 
         self.assertTrue(
             invoice.reminder_sent
         )
-
 
         self.assertEqual(
             first_run,
             "1 invoice reminders sent."
         )
 
-
         self.assertEqual(
             second_run,
             "0 invoice reminders sent."
         )
-
 
         self.assertEqual(
             mock_notification.call_count,

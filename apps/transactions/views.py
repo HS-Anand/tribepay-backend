@@ -40,10 +40,13 @@ class TransferView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+
         serializer = TransferSerializer()
+
         return Response(serializer.data)
 
     def post(self, request):
+
         serializer = TransferSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -69,9 +72,7 @@ class TransferView(APIView):
 
         except ValidationError as e:
             return Response(
-                {
-                    "error": e.message
-                },
+                {"error": e.message},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -87,11 +88,11 @@ class TransactionHistoryView(ListAPIView):
     serializer_class = TransactionResponseSerializer
 
     def get_queryset(self):
+
         return (
             Transaction.objects
             .filter(
-                Q(sender_wallet__memberships__user=self.request.user)
-                |
+                Q(sender_wallet__memberships__user=self.request.user) |
                 Q(receiver_wallet__memberships__user=self.request.user)
             )
             .distinct()

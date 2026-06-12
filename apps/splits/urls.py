@@ -7,7 +7,6 @@ from apps.splits.views import (
 
 
 urlpatterns = [
-
     path("create/",CreateSplitView.as_view()),
     path("", SplitListView.as_view()),
 ]

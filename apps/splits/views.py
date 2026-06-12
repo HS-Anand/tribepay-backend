@@ -62,9 +62,7 @@ class SplitListView(APIView):
         splits = (
             SplitPayment.objects
             .filter(
-                Q(created_by=request.user)
-                |
-                Q(members__user=request.user)
+                Q(created_by=request.user) | Q(members__user=request.user)
             )
             .distinct()
             .order_by("-created_at")

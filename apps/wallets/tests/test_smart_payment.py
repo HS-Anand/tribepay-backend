@@ -35,7 +35,6 @@ class SmartPaymentTest(TestCase):
             password="1234"
         )
 
-
         self.wallet1 = Wallet.objects.create(
             wallet_type="PRS",
             balance=Decimal("1000.00")
@@ -45,7 +44,6 @@ class SmartPaymentTest(TestCase):
             wallet_type="PRS",
             balance=Decimal("0.00")
         )
-
 
         WalletMembership.objects.create(
             wallet=self.wallet1,
@@ -57,66 +55,40 @@ class SmartPaymentTest(TestCase):
             user=self.user2
         )
 
-
     def test_smart_payment_with_split_atomic_workflow(self):
 
         print(
             "\n\n===== TEST: SMART PAYMENT ATOMIC WORKFLOW ====="
         )
 
-
         result = smart_payment(
             initiated_by_user=self.user1,
-
             sender_wallet_id=self.wallet1.wid,
-
             receiver_wallet_id=self.wallet2.wid,
-
             amount=Decimal("900.00"),
-
             is_split=True,
-
             split_title="Dinner",
-
             split_type="EQUAL",
-
             members=[
-                {
-                    "username": self.user2.username
-                },
-                {
-                    "username": self.user3.username
-                }
+                {"username": self.user2.username},
+                {"username": self.user3.username}
             ]
         )
-
 
         self.wallet1.refresh_from_db()
         self.wallet2.refresh_from_db()
 
-        self.assertEqual(
-            self.wallet1.balance,
-            Decimal("100.00")
-        )
+        self.assertEqual(self.wallet1.balance, Decimal("100.00"))
 
-        self.assertEqual(
-            self.wallet2.balance,
-            Decimal("900.00")
-        )
-
+        self.assertEqual(self.wallet2.balance, Decimal("900.00"))
 
         transaction = result["transaction"]
 
         split = result["split"]
 
-        self.assertIsNotNone(
-            split
-        )
+        self.assertIsNotNone(split)
 
-        self.assertEqual(
-            split.transaction,
-            transaction
-        )
+        self.assertEqual(split.transaction, transaction)
 
         self.assertTrue(
             SplitPayment.objects.filter(
@@ -127,6 +99,5 @@ class SmartPaymentTest(TestCase):
         self.assertEqual(
             CashInvoice.objects.filter(
                 invoice_type="EXPENSE"
-            ).count(),
-            2
+            ).count(), 2
         )

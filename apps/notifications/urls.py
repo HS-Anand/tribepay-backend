@@ -7,7 +7,6 @@ from apps.notifications.views import (
 
 
 urlpatterns = [
-
     path("",NotificationListView.as_view()),
     path("<uuid:nid>/read/", MarkNotificationReadView.as_view()),
 ]

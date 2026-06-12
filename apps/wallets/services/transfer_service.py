@@ -1,5 +1,6 @@
 from decimal import Decimal
 import uuid
+
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
@@ -31,25 +32,17 @@ def transfer_funds(
     idempotency_key=None,
     transaction_type="TRANSFER"
 ):
+
     if idempotency_key is None:
         idempotency_key = str(uuid.uuid4())
 
     amount = Decimal(amount)
 
-    # 1. Light Sanity Checks
-
     if sender_wallet_id == receiver_wallet_id:
-        raise ValidationError(
-            "Cannot transfer to same wallet."
-        )
+        raise ValidationError("Cannot transfer to same wallet.")
 
     if amount <= 0:
-        raise ValidationError(
-            "Amount must be positive."
-        )
-
-
-    # 2. Idempotency Check
+        raise ValidationError("Amount must be positive.")
 
     if idempotency_key:
 
@@ -63,12 +56,9 @@ def transfer_funds(
         if existing_transaction:
             return existing_transaction
 
-
     try:
 
         with transaction.atomic():
-
-            # 3. Deadlock prevention ordering
 
             wallet_ids = sorted(
                 [
@@ -97,14 +87,8 @@ def transfer_funds(
                 elif wallet.wid == receiver_wallet_id:
                     receiver_wallet = wallet
 
-
             if not sender_wallet or not receiver_wallet:
-                raise ValidationError(
-                    "Wallet not found."
-                )
-
-
-            # 4. Authorization checks
+                raise ValidationError("Wallet not found.")
 
             membership_exists = (
                 sender_wallet
@@ -118,33 +102,20 @@ def transfer_funds(
             if not membership_exists:
                 raise UnauthorizedWalletException()
 
-
             if not sender_wallet.is_active:
-                raise InactiveWalletException(
-                    "Sender wallet is inactive."
-                )
-
+                raise InactiveWalletException("Sender wallet is inactive.")
 
             if not receiver_wallet.is_active:
-                raise InactiveWalletException(
-                    "Receiver wallet is inactive."
-                )
-
+                raise InactiveWalletException("Receiver wallet is inactive.")
 
             if sender_wallet.balance < amount:
                 raise InsufficientBalanceException()
-
-
-            # 5. Balance update
 
             sender_wallet.balance -= amount
             receiver_wallet.balance += amount
 
             sender_wallet.save()
             receiver_wallet.save()
-
-
-            # 6. Transaction type resolution
 
             if transaction_type == "TRANSFER":
 
@@ -159,7 +130,6 @@ def transfer_funds(
                         .GROUP_CONTRIBUTION
                     )
 
-
                 elif (
                     sender_wallet.wallet_type == "GRP"
                     and
@@ -171,28 +141,15 @@ def transfer_funds(
                         .GROUP_EXPENSE
                     )
 
-
-            # 7. Transaction creation
-
             txn = Transaction.objects.create(
-
                 initiated_by_user=initiated_by_user,
-
                 sender_wallet=sender_wallet,
-
                 receiver_wallet=receiver_wallet,
-
                 amount=amount,
-
                 status=Transaction.Status.SUCCESS,
-
                 transaction_type=transaction_type,
-
                 idempotency_key=idempotency_key,
             )
-
-
-            # 8. Receiver notifications
 
             if receiver_wallet.wallet_type == "PRS":
 
@@ -209,15 +166,9 @@ def transfer_funds(
                 ):
 
                     create_notification(
-
                         user=receiver_member.user,
-
-                        message=(
-                            f"You received ₹{amount} "
-                            f"from {initiated_by_user.username}."
-                        )
+                        message=f"You received ₹{amount} from {initiated_by_user.username}."
                     )
-
 
             elif receiver_wallet.wallet_type == "GRP":
 
@@ -232,18 +183,9 @@ def transfer_funds(
                 for member in group_members:
 
                     create_notification(
-
                         user=member.user,
-
-                        message=(
-                            f"{receiver_wallet.group_name} "
-                            f"received ₹{amount} contribution "
-                            f"from {initiated_by_user.username}."
-                        )
+                        message=f"{receiver_wallet.group_name} received ₹{amount} contribution from {initiated_by_user.username}."
                     )
-
-
-            # 9. Group spending notification
 
             if sender_wallet.wallet_type == "GRP":
 
@@ -258,36 +200,20 @@ def transfer_funds(
                 for member in group_members:
 
                     create_notification(
-
                         user=member.user,
-
-                        message=(
-                            f"{initiated_by_user.username} "
-                            f"spent ₹{amount} "
-                            f"from {sender_wallet.group_name}."
-                        )
+                        message=f"{initiated_by_user.username} spent ₹{amount} from {sender_wallet.group_name}."
                     )
-
 
             return txn
 
-
     except InsufficientBalanceException:
 
-        raise ValidationError(
-            "Insufficient balance."
-        )
-
+        raise ValidationError("Insufficient balance.")
 
     except UnauthorizedWalletException:
 
-        raise ValidationError(
-            "User not authorized for this wallet."
-        )
-
+        raise ValidationError("User not authorized for this wallet.")
 
     except InactiveWalletException as e:
 
-        raise ValidationError(
-            e.message
-        )
+        raise ValidationError(e.message)

@@ -8,10 +8,7 @@ from apps.transactions.models import Transaction
 from apps.notifications.services import create_notification
 
 
-def add_money(
-    user,
-    amount
-):
+def add_money(user, amount):
 
     amount = Decimal(amount)
 
@@ -36,12 +33,10 @@ def add_money(
             transaction_type=Transaction.TransactionType.DEPOSIT,
             status=Transaction.Status.SUCCESS
         )
+
         create_notification(
             user=user,
-            message=(
-                f"₹{amount} added successfully "
-                f"to your wallet."
-            )
+            message=f"₹{amount} added successfully to your wallet."
         )
 
         return wallet, transaction_obj

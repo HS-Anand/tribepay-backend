@@ -56,7 +56,6 @@ class TransferServiceTest(TestCase):
             role="OWNER"
         )
 
-
     def test_successful_transfer_updates_balance(self):
 
         print(
@@ -74,98 +73,61 @@ class TransferServiceTest(TestCase):
         self.wallet1.refresh_from_db()
         self.wallet2.refresh_from_db()
 
-        self.assertEqual(
-            self.wallet1.balance,
-            Decimal("500.00")
-        )
-
-        self.assertEqual(
-            self.wallet2.balance,
-            Decimal("500.00")
-        )
-
-        self.assertEqual(
-            Transaction.objects.count(),
-            1
-        )
-
+        self.assertEqual(self.wallet1.balance, Decimal("500.00"))
+        self.assertEqual(self.wallet2.balance, Decimal("500.00"))
+        self.assertEqual(Transaction.objects.count(), 1)
 
     def test_insufficient_balance_transfer_blocked(self):
 
         print(
-        "\n\n===== TEST: INSUFFICIENT BALANCE PROTECTION ====="
+            "\n\n===== TEST: INSUFFICIENT BALANCE PROTECTION ====="
         )
-
 
         with self.assertRaises(ValidationError):
 
             transfer_funds(
-            initiated_by_user=self.user1,
-            sender_wallet_id=self.wallet1.wid,
-            receiver_wallet_id=self.wallet2.wid,
-            amount=Decimal("2000.00"),
-            idempotency_key=uuid.uuid4()
+                initiated_by_user=self.user1,
+                sender_wallet_id=self.wallet1.wid,
+                receiver_wallet_id=self.wallet2.wid,
+                amount=Decimal("2000.00"),
+                idempotency_key=uuid.uuid4()
             )
-
 
         self.wallet1.refresh_from_db()
         self.wallet2.refresh_from_db()
 
-
-        self.assertEqual(
-        self.wallet1.balance,
-        Decimal("1000.00")
-        )
-
-
-        self.assertEqual(
-        self.wallet2.balance,
-        Decimal("0.00")
-        )
-
-
-        self.assertEqual(
-        Transaction.objects.count(),
-        0
-        )
+        self.assertEqual(self.wallet1.balance, Decimal("1000.00"))
+        self.assertEqual(self.wallet2.balance, Decimal("0.00"))
+        self.assertEqual(Transaction.objects.count(), 0)
 
     def test_total_balance_remains_constant_after_transfer(self):
 
         print(
-        "\n\n===== TEST: BALANCE CONSERVATION INVARIANT ====="
+            "\n\n===== TEST: BALANCE CONSERVATION INVARIANT ====="
         )
-
 
         before_total = (
-        self.wallet1.balance +
-        self.wallet2.balance
+            self.wallet1.balance +
+            self.wallet2.balance
         )
-
 
         transfer_funds(
-        initiated_by_user=self.user1,
-        sender_wallet_id=self.wallet1.wid,
-        receiver_wallet_id=self.wallet2.wid,
-        amount=Decimal("300.00"),
-        idempotency_key=uuid.uuid4()
+            initiated_by_user=self.user1,
+            sender_wallet_id=self.wallet1.wid,
+            receiver_wallet_id=self.wallet2.wid,
+            amount=Decimal("300.00"),
+            idempotency_key=uuid.uuid4()
         )
-
 
         self.wallet1.refresh_from_db()
         self.wallet2.refresh_from_db()
 
-
         after_total = (
-        self.wallet1.balance +
-        self.wallet2.balance
+            self.wallet1.balance +
+            self.wallet2.balance
         )
 
-
-        self.assertEqual(
-        before_total,
-        after_total
-        )
-
+        self.assertEqual(before_total, after_total)
 
     def test_idempotency_key_prevents_duplicate_transfer(self):
 
@@ -194,26 +156,10 @@ class TransferServiceTest(TestCase):
         self.wallet1.refresh_from_db()
         self.wallet2.refresh_from_db()
 
-        self.assertEqual(
-            first_transaction.tid,
-            second_transaction.tid
-        )
-
-        self.assertEqual(
-            self.wallet1.balance,
-            Decimal("500.00")
-        )
-
-        self.assertEqual(
-            self.wallet2.balance,
-            Decimal("500.00")
-        )
-
-        self.assertEqual(
-            Transaction.objects.count(),
-            1
-        )
-
+        self.assertEqual(first_transaction.tid, second_transaction.tid)
+        self.assertEqual(self.wallet1.balance, Decimal("500.00"))
+        self.assertEqual(self.wallet2.balance, Decimal("500.00"))
+        self.assertEqual(Transaction.objects.count(), 1)
 
     def test_transfer_rollback_on_failure(self):
 
@@ -246,21 +192,9 @@ class TransferServiceTest(TestCase):
         self.wallet1.refresh_from_db()
         self.wallet2.refresh_from_db()
 
-        self.assertEqual(
-            self.wallet1.balance,
-            Decimal("1000.00")
-        )
-
-        self.assertEqual(
-            self.wallet2.balance,
-            Decimal("0.00")
-        )
-
-        self.assertEqual(
-            Transaction.objects.count(),
-            0
-        )
-
+        self.assertEqual(self.wallet1.balance, Decimal("1000.00"))
+        self.assertEqual(self.wallet2.balance, Decimal("0.00"))
+        self.assertEqual(Transaction.objects.count(), 0)
 
     def test_user_cannot_spend_wallet_they_do_not_own(self):
 
@@ -281,17 +215,6 @@ class TransferServiceTest(TestCase):
         self.wallet1.refresh_from_db()
         self.wallet2.refresh_from_db()
 
-        self.assertEqual(
-            self.wallet1.balance,
-            Decimal("1000.00")
-        )
-
-        self.assertEqual(
-            self.wallet2.balance,
-            Decimal("0.00")
-        )
-
-        self.assertEqual(
-            Transaction.objects.count(),
-            0
-        )
+        self.assertEqual(self.wallet1.balance, Decimal("1000.00"))
+        self.assertEqual(self.wallet2.balance, Decimal("0.00"))
+        self.assertEqual(Transaction.objects.count(), 0)

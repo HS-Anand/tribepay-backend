@@ -1,17 +1,12 @@
 from rest_framework import serializers
 
 
-
-class SettlementPreviewSerializer(
-    serializers.Serializer
-):
+class SettlementPreviewSerializer(serializers.Serializer):
 
     user = serializers.CharField()
 
     amount = serializers.DecimalField(
-
         max_digits=12,
-
         decimal_places=2
     )
 
@@ -19,8 +14,7 @@ class SettlementPreviewSerializer(
 
     can_settle = serializers.BooleanField()
 
-class ExecuteSettlementSerializer(
-    serializers.Serializer
-):
+
+class ExecuteSettlementSerializer(serializers.Serializer):
 
     username = serializers.CharField()

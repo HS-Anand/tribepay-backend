@@ -1,52 +1,36 @@
 # Environment
 .env
 
-
 # Python
 venv/
-
 __pycache__/
-
 *.pyc
-
 *.pyo
-
 
 # Database
 db.sqlite3
 
-
 # Logs
 *.log
-
 
 # MacOS
 .DS_Store
 
-
 # IDE
 .vscode/
-
 .idea/
-
 
 # Testing
 .coverage
-
 .pytest_cache/
-
 
 # Celery
 celerybeat-schedule
-
 celerybeat.pid
-
 
 # Static / Media generated files
 staticfiles/
-
 media/
-
 
 # Docker
 *.pid

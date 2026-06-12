@@ -59,27 +59,14 @@ class SignupSerializer(serializers.ModelSerializer):
 
         return attrs
 
-    
 
     def create(self, validated_data):
 
         with transaction.atomic():
+            validated_data.pop("confirm_password")
 
-            validated_data.pop(
-                "confirm_password"
-            )
-
-            first_name = (
-                validated_data[
-                    "first_name"
-                ].lower()
-            )
-
-            last_name = (
-                validated_data[
-                    "last_name"
-                ].lower()
-            )
+            first_name = validated_data["first_name"].lower()
+            last_name = validated_data["last_name"].lower()
 
             username = (
                 f"{first_name}_"
@@ -89,30 +76,19 @@ class SignupSerializer(serializers.ModelSerializer):
 
             user = User.objects.create_user(
                 username=username,
-
-                first_name=validated_data[
-                    "first_name"
-            ],
-
-                last_name=validated_data[
-                    "last_name"
-            ],
-
-                phone_number=validated_data[
-                    "phone_number"
-            ],
-
-                password=validated_data[
-                    "password"
-            ],
-        )
+                first_name=validated_data["first_name"],
+                last_name=validated_data["last_name"],
+                phone_number=validated_data["phone_number"],
+                password=validated_data["password"],
+            )
 
             create_personal_wallet(user)
 
             return user
-    
+
+
 class LoginSerializer(serializers.Serializer):
 
     phone_number = serializers.CharField()
-
+    
     password = serializers.CharField(write_only=True)

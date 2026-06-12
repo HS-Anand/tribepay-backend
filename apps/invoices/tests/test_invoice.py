@@ -40,7 +40,6 @@ class InvoiceConcurrencyTest(TransactionTestCase):
             password="1234"
         )
 
-
         self.creator_wallet = Wallet.objects.create(
             wallet_type="PRS",
             balance=Decimal("0.00")
@@ -50,7 +49,6 @@ class InvoiceConcurrencyTest(TransactionTestCase):
             wallet_type="PRS",
             balance=Decimal("1000.00")
         )
-
 
         WalletMembership.objects.create(
             user=self.creator,
@@ -63,7 +61,6 @@ class InvoiceConcurrencyTest(TransactionTestCase):
             wallet=self.payer_wallet,
             role="OWNER"
         )
-
 
         self.invoice = CashInvoice.objects.create(
             created_by=self.creator,
@@ -79,9 +76,7 @@ class InvoiceConcurrencyTest(TransactionTestCase):
             "\n\n===== TEST: INVOICE DOUBLE PAYMENT RACE PREVENTION ====="
         )
 
-
         errors = []
-
 
         def attempt_payment():
 
@@ -100,7 +95,6 @@ class InvoiceConcurrencyTest(TransactionTestCase):
 
                 connection.close()
 
-
         thread1 = threading.Thread(
             target=attempt_payment
         )
@@ -109,43 +103,35 @@ class InvoiceConcurrencyTest(TransactionTestCase):
             target=attempt_payment
         )
 
-
         thread1.start()
         thread2.start()
-
 
         thread1.join()
         thread2.join()
 
-
         self.invoice.refresh_from_db()
         self.creator_wallet.refresh_from_db()
         self.payer_wallet.refresh_from_db()
-
 
         self.assertEqual(
             self.invoice.status,
             "PAID"
         )
 
-
         self.assertEqual(
             Transaction.objects.count(),
             1
         )
-
 
         self.assertEqual(
             self.creator_wallet.balance,
             Decimal("500.00")
         )
 
-
         self.assertEqual(
             self.payer_wallet.balance,
             Decimal("500.00")
         )
-
 
     def test_invalid_invoice_state_transition(self):
 
@@ -153,10 +139,8 @@ class InvoiceConcurrencyTest(TransactionTestCase):
             "\n\n===== TEST: INVALID INVOICE STATE TRANSITION ====="
         )
 
-
         self.invoice.status = "REJECTED"
         self.invoice.save()
-
 
         with self.assertRaises(ValidationError):
 
@@ -165,15 +149,12 @@ class InvoiceConcurrencyTest(TransactionTestCase):
                 invoice_id=self.invoice.iid
             )
 
-
         self.invoice.refresh_from_db()
-
 
         self.assertEqual(
             self.invoice.status,
             "REJECTED"
         )
-
 
         self.assertEqual(
             Transaction.objects.count(),

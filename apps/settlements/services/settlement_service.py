@@ -168,11 +168,7 @@ def execute_settlement(user, other_username):
         transaction_type=Transaction.TransactionType.SETTLEMENT
     )
 
-    all_invoices = (
-        list(they_owe_invoices)
-        +
-        list(you_owe_invoices)
-    )
+    all_invoices = list(they_owe_invoices) + list(you_owe_invoices)
 
     for invoice in all_invoices:
         invoice.status = "SETTLED"

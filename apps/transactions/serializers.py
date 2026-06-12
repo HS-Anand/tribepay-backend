@@ -30,6 +30,7 @@ class TransactionResponseSerializer(serializers.ModelSerializer):
     receiver_username = serializers.SerializerMethodField()
 
     class Meta:
+
         model = Transaction
 
         fields = [

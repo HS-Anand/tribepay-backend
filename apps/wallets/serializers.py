@@ -3,10 +3,7 @@ from rest_framework import serializers
 from apps.wallets.models import Wallet
 
 
-
-class WalletSerializer(
-    serializers.ModelSerializer
-):
+class WalletSerializer(serializers.ModelSerializer):
 
     class Meta:
 
@@ -22,9 +19,7 @@ class WalletSerializer(
         ]
 
 
-class AddMoneySerializer(
-    serializers.Serializer
-):
+class AddMoneySerializer(serializers.Serializer):
 
     amount = serializers.DecimalField(
         max_digits=12,
@@ -32,34 +27,26 @@ class AddMoneySerializer(
     )
 
 
-class CreateGroupWalletSerializer(
-    serializers.Serializer
-):
+class CreateGroupWalletSerializer(serializers.Serializer):
 
     group_name = serializers.CharField(
         max_length=100
     )
 
 
-class JoinGroupSerializer(
-    serializers.Serializer
-):
+class JoinGroupSerializer(serializers.Serializer):
 
     group_code = serializers.CharField(
         max_length=6
     )
 
 
-class ApproveJoinRequestSerializer(
-    serializers.Serializer
-):
+class ApproveJoinRequestSerializer(serializers.Serializer):
 
     request_id = serializers.UUIDField()
 
 
-class PendingJoinRequestSerializer(
-    serializers.Serializer
-):
+class PendingJoinRequestSerializer(serializers.Serializer):
 
     request_id = serializers.UUIDField(
         source="rid"
@@ -72,9 +59,7 @@ class PendingJoinRequestSerializer(
     status = serializers.CharField()
 
 
-class MyGroupSerializer(
-    serializers.Serializer
-):
+class MyGroupSerializer(serializers.Serializer):
 
     wid = serializers.UUIDField(
         source="wallet.wid"
@@ -101,9 +86,7 @@ class MyGroupSerializer(
     )
 
 
-class GroupMemberSerializer(
-    serializers.Serializer
-):
+class GroupMemberSerializer(serializers.Serializer):
 
     username = serializers.CharField(
         source="user.username"
@@ -111,10 +94,7 @@ class GroupMemberSerializer(
 
     role = serializers.CharField()
 
-
-class GroupTransactionSerializer(
-    serializers.Serializer
-):
+class GroupTransactionSerializer(serializers.Serializer):
 
     transaction_id = serializers.UUIDField(
         source="tid"
@@ -149,16 +129,12 @@ class GroupTransactionSerializer(
 
     created_at = serializers.DateTimeField()
 
-class LeaveGroupSerializer(
-    serializers.Serializer
-):
+class LeaveGroupSerializer(serializers.Serializer):
 
     group_id = serializers.UUIDField()
 
 
-class RemoveMemberSerializer(
-    serializers.Serializer
-):
+class RemoveMemberSerializer(serializers.Serializer):
 
     group_id = serializers.UUIDField()
 
@@ -174,6 +150,7 @@ class SmartPaymentMemberSerializer(serializers.Serializer):
         decimal_places=2,
         required=False
     )
+
 
 class SmartPaymentSerializer(serializers.Serializer):
 

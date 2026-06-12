@@ -1,7 +1,8 @@
 from decimal import Decimal
+import uuid
+
 from django.conf import settings
 from django.db import models
-import uuid
 
 
 class Wallet(models.Model):
@@ -48,17 +49,11 @@ class Wallet(models.Model):
         related_name="created_group_wallets"
     )
 
-    is_active = models.BooleanField(
-        default=True
-    )
+    is_active = models.BooleanField(default=True)
 
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    updated_at = models.DateTimeField(
-        auto_now=True
-    )
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class WalletMembership(models.Model):
@@ -93,12 +88,9 @@ class WalletMembership(models.Model):
 
     def __str__(self):
 
-        return (
-            f"{self.user.username}"
-            f" -> "
-            f"{self.wallet.wid}"
-        )
-    
+        return f"{self.user.username} -> {self.wallet.wid}"
+
+
 class GroupJoinRequest(models.Model):
 
     rid = models.UUIDField(
@@ -129,9 +121,7 @@ class GroupJoinRequest(models.Model):
         default="PENDING"
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
 
@@ -143,7 +133,6 @@ class GroupJoinRequest(models.Model):
     def __str__(self):
 
         return (
-            f"{self.requested_user.username}"
-            f" requested to join "
+            f"{self.requested_user.username} requested to join "
             f"{self.wallet.group_name}"
         )

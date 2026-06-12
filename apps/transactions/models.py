@@ -1,7 +1,9 @@
 import uuid
+
 from django.db import models
-from apps.wallets.models import Wallet
 from django.conf import settings
+
+from apps.wallets.models import Wallet
 
 
 class Transaction(models.Model):
@@ -53,7 +55,7 @@ class Transaction(models.Model):
         choices=TransactionType.choices,
         default=TransactionType.TRANSFER
     )
-    
+
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -75,14 +77,14 @@ class Transaction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+
         constraints = [
             models.CheckConstraint(
                 check=models.Q(amount__gt=0),
                 name="amount_must_be_positive"
             )
         ]
-     
-
 
     def __str__(self):
+
         return f"{self.reference_id} - {self.status}"

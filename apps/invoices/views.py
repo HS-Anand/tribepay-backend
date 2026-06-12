@@ -185,9 +185,7 @@ class InvoiceListView(ListAPIView):
 
         else:
             invoices = CashInvoice.objects.filter(
-                Q(created_by=self.request.user)
-                |
-                Q(payer=self.request.user)
+                Q(created_by=self.request.user) | Q(payer=self.request.user)
             )
 
         if status:
