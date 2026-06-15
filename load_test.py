@@ -10,7 +10,7 @@ URL = "https://tribepay-backend.onrender.com/wallets/me/"
 
 
 HEADERS = {
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgxNTM2OTg0LCJpYXQiOjE3ODE1MDA5ODQsImp0aSI6IjllODEwZDM1ZDc5NDQ5NjQ5YjA4OWQ3MzcxNmFhYzc5IiwidXNlcl9pZCI6IjEifQ.qvvA24tRx0pFTD8Tbwh-XVxVA708cCPi09s55epbfrA"
+    "Authorization": "Bearer YOUR_ACCESS_TOKEN"
 }
 
 
