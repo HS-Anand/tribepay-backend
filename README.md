@@ -794,8 +794,7 @@ Current deployment:
 
 # Future Improvements
 
-* Frontend client
-* Docker containerization
-* Structured logging
-* Monitoring
-* Advanced caching
+* User-facing web/mobile application for managing wallets, tribe payments, cash invoices, splits, and settlements
+* Docker-based containerization to simplify environment setup and maintain consistent deployments across systems
+* Enhanced observability with structured transaction logging to trace payment workflows across wallet, invoice, split, and settlement services
+* Database performance optimization using indexing and connection pooling to improve scalability under higher concurrent transaction loads
