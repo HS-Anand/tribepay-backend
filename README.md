@@ -352,7 +352,8 @@ Database concepts used:
 * Decimal fields for money storage
 * Created/updated timestamps
 
-(Add ER diagram here)
+<img width="1536" height="1024" alt="er diagram" src="https://github.com/user-attachments/assets/0bad3224-af89-40f2-985d-f1d9220ebb53" />
+
 
 ---
 
@@ -512,7 +513,8 @@ Swagger UI:
 https://tribepay-backend.onrender.com/
 ```
 
-(Add Swagger screenshot)
+<img width="1440" height="900" alt="swagger ss" src="https://github.com/user-attachments/assets/ce05d00d-b9fd-4488-83ff-0aa739eba2fc" />
+
 
 ---
 
@@ -535,6 +537,9 @@ Ran 16 tests in 7.805s
 
 OK
 ```
+
+<img width="624" height="820" alt="test-ss" src="https://github.com/user-attachments/assets/530a7a23-f8a0-491d-a692-9476597aac22" />
+
 
 Coverage:
 
@@ -639,6 +644,9 @@ P95 Latency:
 
 ~519 ms
 ```
+
+<img width="595" height="503" alt="load_test ss" src="https://github.com/user-attachments/assets/476f9b5a-bb0c-433d-95fd-41ee55fcf598" />
+
 
 Stress testing identified deployment resource limits as the scaling bottleneck.
 
