@@ -2,19 +2,22 @@
 
 ## Your tribe. Your money. Together.
 
-TribePay is a transaction-safe collaborative payment backend that provides wallet infrastructure for individuals and groups.
+TribePay is a transaction-safe collaborative payment backend — wallet infrastructure for individuals and groups, built around financial correctness at every layer.
 
-At its core, TribePay is built around a **money movement engine** responsible for executing wallet transfers, maintaining transaction history, and ensuring financial correctness.
+At its core, TribePay is powered by a money movement engine responsible for executing wallet transfers, maintaining a transaction ledger, and preserving financial consistency.
 
-On top of this transaction layer, TribePay enables shared wallets, automatic expense splitting, cash invoice requests, and optimized settlements.
+On top of this transaction layer, TribePay enables shared tribe wallets, smart expense splitting, cash invoice requests, settlements, and automated background workflows.
+
+**Live Swagger API:**  
+https://tribepay-backend.onrender.com/
 
 ---
 
-## Why TribePay?
+# Why TribePay?
 
-Traditional expense trackers mainly record who owes whom after payments happen externally.
+Most expense-splitting applications only record who owes whom after money has already moved externally.
 
-TribePay focuses on the complete payment workflow:
+TribePay handles the complete payment workflow:
 
 ```
 Payment Initiated
@@ -30,7 +33,116 @@ Cash Invoice Generation
 Repayment / Settlement
 ```
 
-The goal is to handle collaborative money movement while maintaining reliability, consistency, and correctness.
+The goal is not only expense tracking — but building a reliable transaction system with correctness, consistency, and auditability.
+
+---
+
+# Engineering Highlights
+
+## Financial Consistency
+
+All critical money operations execute inside database transactions using:
+
+```python
+transaction.atomic()
+```
+
+Operations:
+
+- Wallet debit
+- Wallet credit
+- Transaction ledger creation
+
+commit together as a single unit.
+
+If any step fails:
+
+```
+Failure
+   ↓
+Rollback
+   ↓
+Original wallet state preserved
+```
+
+This prevents partial money movement and inconsistent balances.
+
+---
+
+## Race Condition Protection
+
+Concurrent wallet updates are protected using PostgreSQL row-level locking:
+
+```python
+select_for_update()
+```
+
+Example:
+
+```
+Wallet Balance: ₹500
+
+Request A → Spend ₹400
+Request B → Spend ₹400
+```
+
+Only one transaction succeeds. The other request fails safely.
+
+Prevents:
+
+- Double spending
+- Balance corruption
+- Concurrent invoice payments
+
+---
+
+## Deadlock Prevention
+
+Wallet locks are acquired in deterministic wallet ID order.
+
+This prevents circular waits when multiple transactions involving the same wallets execute simultaneously.
+
+---
+
+## Idempotency Handling
+
+Payment operations support idempotency keys.
+
+Protects against:
+
+- Network retries
+- Duplicate requests
+- Accidental double payments
+
+Flow:
+
+```
+First Request
+      ↓
+Transaction Created
+
+
+Duplicate Request
+      ↓
+Existing Transaction Returned
+```
+
+---
+
+## Async Processing
+
+Implemented using:
+
+- Celery
+- Redis
+- Celery Beat
+
+Background workflows:
+
+- Automatic invoice expiry
+- Payment reminders
+
+Jobs are designed to be idempotent to prevent duplicate processing during retries.
 
 ---
 
@@ -38,17 +150,14 @@ The goal is to handle collaborative money movement while maintaining reliability
 
 ## Wallet Infrastructure
 
-Unified wallet system supporting multiple wallet types.
+Unified wallet system supporting:
 
-Features:
-
-* Personal wallets
-* Group (Tribe) wallets
-* Wallet membership system
-* OWNER / MEMBER roles
-* Balance tracking
-* Active/inactive wallet lifecycle
-* User-wallet relationship management
+- Personal wallets
+- Group (Tribe) wallets
+- OWNER / MEMBER roles
+- Wallet membership lifecycle
+- Balance tracking
+- Active/inactive wallet states
 
 ---
 
@@ -56,68 +165,36 @@ Features:
 
 The transaction engine is the core layer powering TribePay.
 
-Supported transaction flows:
+Supported flows:
 
-* Personal → Personal transfers
-* Personal → Group contributions
-* Group spending
-* Invoice payments
-* Settlement payments
+- Personal → Personal transfers
+- Personal → Group contributions
+- Group expenses
+- Invoice payments
+- Settlement payments
 
 Transaction types:
 
-* TRANSFER
-* DEPOSIT
-* GROUP_CONTRIBUTION
-* GROUP_EXPENSE
-* WITHDRAWAL
-* SETTLEMENT
+- TRANSFER
+- DEPOSIT
+- GROUP_CONTRIBUTION
+- GROUP_EXPENSE
+- WITHDRAWAL
+- SETTLEMENT
 
 Each transaction stores:
 
-* Sender wallet
-* Receiver wallet
-* Initiating user
-* Amount
-* Transaction type
-* Status
-* Reference ID
-* Idempotency key
-* Timestamp
+- Sender wallet
+- Receiver wallet
+- Initiating user
+- Amount
+- Transaction type
+- Status
+- Reference ID
+- Idempotency key
+- Timestamp
 
-The transaction model acts as a centralized ledger and audit history for all money movement.
-
----
-
-## Transaction Lifecycle
-
-```
-API Request
-
-    ↓
-
-Validate User Access
-
-    ↓
-
-Acquire Wallet Locks
-
-    ↓
-
-Validate Balance
-
-    ↓
-
-Update Wallet Balances
-
-    ↓
-
-Create Transaction Record
-
-    ↓
-
-Commit Transaction
-```
+The Transaction model acts as a centralized ledger and audit history for every money movement.
 
 ---
 
@@ -127,23 +204,20 @@ Shared financial spaces for groups.
 
 Features:
 
-* Create tribe wallets
-* Unique group codes
-* Join requests
-* Owner approval/rejection
-* Member removal
-* Leave group workflow
-* Membership tracking
+- Create tribe wallets
+- Unique group invite codes
+- Join request workflow
+- Owner approval/rejection
+- Member removal
+- Leave group workflow
 
 ---
 
 # Smart Payment Engine
 
-Smart payments combine transactions, splitting, and invoices into a single workflow.
+Smart payments combine multiple financial workflows into one atomic operation.
 
 Example:
-
-A user pays a group bill.
 
 ```
 Payment
@@ -159,9 +233,9 @@ Payment
 
 Implemented through:
 
-* Transfer service
-* Split service
-* Invoice service
+- Transfer Service
+- Split Service
+- Invoice Service
 
 ---
 
@@ -171,29 +245,27 @@ Payment request infrastructure built on top of wallet transactions.
 
 Features:
 
-* Create payment requests
-* Assign payer
-* Pay invoice through wallet
-* Reject invoice
-* Invoice history
-* Invoice filtering
-* Automatic expiry
+- Create payment requests
+- Assign payer
+- Pay invoice through wallet engine
+- Reject invoice
+- Invoice history
+- Filtering
+- Automatic expiry
 
-Invoice lifecycle:
+Lifecycle:
 
 ```
 PENDING
 
-   ├── PAID
+ ├── PAID
 
-   ├── REJECTED
+ ├── REJECTED
 
-   ├── EXPIRED
+ ├── EXPIRED
 
-   └── SETTLED
+ └── SETTLED
 ```
-
-Invoices are linked with transactions after payment execution.
 
 ---
 
@@ -203,22 +275,18 @@ Automated expense splitting system.
 
 Supports:
 
-* Equal splits
-* Custom amount splits
-* Split history
-* Automatic invoice generation
+- Equal splits
+- Custom amount splits
+- Automatic invoice generation
+- Split history
 
 Flow:
 
 ```
 SplitPayment
-
       ↓
-
 SplitMember
-
       ↓
-
 CashInvoice
 ```
 
@@ -230,64 +298,61 @@ Optimizes repayments between group members.
 
 Features:
 
-* Net balance calculation
-* Bilateral debt optimization
-* Optimized settlement calculation
-* Settlement execution through wallet transactions
-* Invoice settlement tracking
+- Net balance calculation
+- Bilateral debt optimization
+- Optimized settlement calculation
+- Settlement execution through wallet transactions
+- Invoice settlement tracking
 
 ---
 
 # Notification System
 
-Event-based notification system.
+Event-based notification service.
 
 Events:
 
-* Money sent
-* Money received
-* Group contributions
-* Group spending
-* Invoice creation
-* Invoice payment
-* Invoice rejection
-* Expiry reminders
-* Join requests
-* Member approval/rejection
+- Money sent
+- Money received
+- Group transactions
+- Invoice creation/payment/rejection
+- Expiry reminders
+- Join requests
+- Member approval/rejection
 
 ---
 
-# System Architecture
+# Architecture
 
 TribePay follows a modular service-layer architecture.
 
 ```
-Client
+API Request
 
-  ↓
+ ↓
 
 Django REST Framework Views
 
-  ↓
+ ↓
 
 Serializers
 
-  ↓
+ ↓
 
 Service Layer
 
-  ↓
+ ↓
 
 Django ORM
 
-  ↓
+ ↓
 
 PostgreSQL
 ```
 
 Views handle HTTP logic.
 
-Services handle business workflows.
+Services contain business workflows.
 
 ---
 
@@ -331,152 +396,28 @@ notifications/
 
 # Database Design
 
-Core models:
+Models:
 
-* User
-* Wallet
-* WalletMembership
-* GroupJoinRequest
-* Transaction
-* CashInvoice
-* SplitPayment
-* SplitMember
-* Notification
+- User
+- Wallet
+- WalletMembership
+- GroupJoinRequest
+- Transaction
+- CashInvoice
+- SplitPayment
+- SplitMember
+- Notification
 
-Database concepts used:
+Design decisions:
 
-* UUID identifiers
-* Foreign key relationships
-* Many-to-many relationships using custom models
-* Database constraints
-* Decimal fields for money storage
-* Created/updated timestamps
+- UUID identifiers
+- Foreign key relationships
+- Custom many-to-many models
+- Database constraints
+- Decimal fields for money precision
+- Created/updated timestamps
 
-<img width="1536" height="1024" alt="er diagram" src="https://github.com/user-attachments/assets/0bad3224-af89-40f2-985d-f1d9220ebb53" />
-
-
----
-
-# Financial Reliability Engineering
-
-## Atomic Transactions
-
-Critical money operations use:
-
-```python
-transaction.atomic()
-```
-
-Guarantees:
-
-* Wallet debit
-* Wallet credit
-* Transaction creation
-
-execute together.
-
-If any step fails:
-
-```
-Error
-
- ↓
-
-Rollback
-
- ↓
-
-Original balances preserved
-```
-
----
-
-## Race Condition Protection
-
-Problem:
-
-```
-Wallet Balance = ₹500
-
-
-Request A spends ₹400
-
-Request B spends ₹400
-```
-
-Both arrive together.
-
-Solution:
-
-PostgreSQL row-level locking:
-
-```python
-select_for_update()
-```
-
-Prevents:
-
-* Double spending
-* Balance corruption
-* Concurrent invoice payments
-
----
-
-# Deadlock Prevention
-
-Wallet locks are acquired in a deterministic order using wallet IDs.
-
-This avoids circular waits during simultaneous transfers.
-
----
-
-# Idempotency Handling
-
-Payments support idempotency keys.
-
-Protects against:
-
-* Network retries
-* Duplicate requests
-* Double payment attempts
-
-Flow:
-
-```
-First request
-
-      ↓
-
-Transaction created
-
-
-Duplicate request
-
-      ↓
-
-Existing transaction returned
-```
-
----
-
-# Async Processing
-
-Implemented using:
-
-* Celery
-* Redis
-* Celery Beat
-
-Background workflows:
-
-* Automatic invoice expiry
-* Payment reminders
-
-Reliability:
-
-* Persistent reminder state
-* Duplicate reminder prevention
-* Idempotent scheduled jobs
+(Add ER diagram image here)
 
 ---
 
@@ -484,12 +425,12 @@ Reliability:
 
 Implemented:
 
-* JWT authentication
-* Protected REST APIs
-* Wallet ownership validation
-* Group role-based authorization
-* Owner-only permission enforcement
-* Invalid transaction and invoice state prevention
+- JWT authentication
+- Protected REST APIs
+- Wallet ownership validation
+- Group role-based authorization
+- Owner-only permission enforcement
+- Invalid transaction and invoice state prevention
 
 ---
 
@@ -499,29 +440,26 @@ Built using Django REST Framework.
 
 Features:
 
-* 28 documented REST APIs
-* Swagger/OpenAPI documentation
-* Postman tested endpoints
-* Pagination
-* Database-level filtering
-* Chronological ordering
+- 28 documented REST APIs
+- Swagger/OpenAPI documentation
+- Postman tested endpoints
+- Pagination
+- Database-level filtering
+- Chronological ordering
 
-Swagger UI:
+**Swagger UI:**
 
-```
 https://tribepay-backend.onrender.com/
-```
 
-<img width="1440" height="900" alt="swagger ss" src="https://github.com/user-attachments/assets/ce05d00d-b9fd-4488-83ff-0aa739eba2fc" />
-
+(Add Swagger screenshot here)
 
 ---
 
 # Testing
 
-Automated backend tests focus on financial correctness.
+Automated backend tests focus on financial correctness and reliability.
 
-Run tests:
+Run:
 
 ```bash
 python manage.py test
@@ -537,65 +475,65 @@ Ran 16 tests in 7.805s
 OK
 ```
 
-<img width="624" height="820" alt="test-ss" src="https://github.com/user-attachments/assets/530a7a23-f8a0-491d-a692-9476597aac22" />
-
+(Add test screenshot here)
 
 Coverage:
 
-### Transactions
+## Transactions
 
-* Successful transfer
-* Ledger creation
-* Balance conservation
-* Rollback protection
-* Insufficient balance handling
+- Successful transfer execution
+- Ledger creation
+- Balance conservation
+- Rollback protection
+- Insufficient balance handling
 
-### Concurrency
+## Concurrency
 
-* Concurrent double spend prevention
-* Invoice double payment prevention
+- Concurrent double-spend prevention
+- Invoice double-payment race prevention
 
-### Idempotency
+## Idempotency
 
-* Duplicate payment prevention
+- Duplicate payment request handling
 
-### Authorization
+## Authorization
 
-* Unauthorized wallet access prevention
-* Owner permission enforcement
+- Unauthorized wallet access prevention
+- Owner permission enforcement
 
-### Workflows
+## Workflows
 
-* Smart payment atomic workflow
-* Settlement calculation
-* Settlement execution
-* Group lifecycle handling
+- Smart payment atomic workflow
+- Settlement calculation
+- Settlement execution
+- Group lifecycle validation
 
-### Background Jobs
+## Background Jobs
 
-* Invoice expiry
-* Reminder idempotency
+- Invoice expiry correctness
+- Reminder idempotency
 
 ---
 
 # Performance Testing
 
-Built a custom concurrent API load tester using:
+Created a custom concurrent API load tester using:
 
-* Python
-* Requests
-* ThreadPoolExecutor
+- Python
+- Requests
+- ThreadPoolExecutor
 
 Measured:
 
-* Success rate
-* Throughput
-* Average latency
-* P95 latency
+- Success rate
+- Throughput
+- Average latency
+- P95 latency
+- Failure rate
 
 ---
 
-## Deployment Benchmark
+# Deployment Benchmark
 
 Environment:
 
@@ -611,89 +549,80 @@ Render Django Backend
 Render PostgreSQL
 ```
 
-Result:
+Results:
 
 ```
 1000 authenticated requests
 
-10 concurrent workers
+Concurrent workers:
+10
 
+Successful requests:
+1000 / 1000
 
-Success:
-
-1000/1000
-
-
-Failure Rate:
-
+Failure rate:
 0%
 
-
 Throughput:
-
 ~37 requests/sec
 
-
-Average Latency:
-
+Average latency:
 ~267 ms
 
-
-P95 Latency:
-
+P95 latency:
 ~519 ms
 ```
 
-<img width="595" height="503" alt="load_test ss" src="https://github.com/user-attachments/assets/476f9b5a-bb0c-433d-95fd-41ee55fcf598" />
+(Add load test screenshot here)
 
-
-Stress testing showed that the transaction service handled concurrent requests correctly, while higher traffic increased latency due to deployment and database resource limitations.
+Stress testing showed that transaction correctness was maintained under concurrent load, while higher traffic increased latency due to deployment and database resource limitations.
 
 ---
 
 # Tech Stack
 
-Backend:
+## Backend
 
-* Django 5
-* Django REST Framework
+- Django 5
+- Django REST Framework
 
-Database:
+## Database
 
-* PostgreSQL
+- PostgreSQL
 
-Authentication:
+## Authentication
 
-* Simple JWT
+- Simple JWT
 
-Async:
+## Async Processing
 
-* Celery
-* Redis
-* Celery Beat
+- Celery
+- Redis
+- Celery Beat
 
-Documentation:
+## Documentation
 
-* Swagger
-* OpenAPI (drf-spectacular)
+- Swagger
+- OpenAPI (drf-spectacular)
 
-Testing:
+## Testing
 
-* Django Test Framework
-* Postman
-* Custom Load Tester
+- Django Test Framework
+- Postman
+- Custom Load Tester
 
-Deployment:
+## Deployment
 
-* Render
-* Gunicorn
-* WhiteNoise
+- Render
+- Gunicorn
+- WhiteNoise
 
-Configuration:
+## Configuration
 
-* Environment variables
-* .env.example
-* requirements.txt dependency management
+- Environment variables
+- .env.example
+- requirements.txt dependency management
+
 ---
 
 # Local Setup
@@ -706,7 +635,7 @@ git clone <repo-url>
 cd TribePay
 ```
 
-Create environment:
+Create virtual environment:
 
 ```bash
 python -m venv venv
@@ -724,7 +653,7 @@ pip install -r requirements.txt
 
 # Environment Setup
 
-A sample environment file is provided.
+A sample environment file is provided:
 
 ```bash
 cp .env.example .env
@@ -762,7 +691,7 @@ Apply migrations:
 python manage.py migrate
 ```
 
-Start server:
+Start development server:
 
 ```bash
 python manage.py runserver
@@ -788,21 +717,21 @@ celery -A TribePay beat -l info
 
 # Deployment
 
-Current deployment:
+Currently deployed using:
 
-* Render Web Service
-* Render PostgreSQL
-* Gunicorn server
-* Environment variable configuration
+- Render Web Service
+- Render PostgreSQL
+- Gunicorn WSGI server
+- Environment-based configuration
 
 ---
 
 # Future Improvements
 
-* User-facing web/mobile application for managing wallets, tribe payments, cash invoices, splits, and settlements
+- User-facing web/mobile application for managing wallets, tribe payments, cash invoices, splits, and settlements
 
-* Docker-based containerization to simplify environment setup and maintain consistent deployments across systems
+- Docker-based containerization to simplify environment setup and maintain consistent deployments across systems
 
-* Enhanced observability with structured transaction logging to trace payment workflows across wallet, invoice, split, and settlement services
+- Enhanced observability with structured transaction logging to trace payment workflows across wallet, invoice, split, and settlement services
 
-* Database performance optimization using indexing and connection pooling to improve scalability under higher concurrent transaction loads
+- Database performance optimization using indexing and connection pooling for higher concurrent transaction loads
