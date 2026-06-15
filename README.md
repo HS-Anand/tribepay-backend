@@ -417,7 +417,8 @@ Design decisions:
 - Decimal fields for money precision
 - Created/updated timestamps
 
-(Add ER diagram image here)
+<img width="1536" height="1024" alt="er diagram" src="https://github.com/user-attachments/assets/1b4d014d-1b2d-4d48-bfce-c004185d2138" />
+
 
 ---
 
@@ -451,7 +452,8 @@ Features:
 
 https://tribepay-backend.onrender.com/
 
-(Add Swagger screenshot here)
+<img width="1440" height="900" alt="swagger ss" src="https://github.com/user-attachments/assets/a6f21174-75ee-4b53-b08a-16d7028e3e0f" />
+
 
 ---
 
@@ -475,7 +477,8 @@ Ran 16 tests in 7.805s
 OK
 ```
 
-(Add test screenshot here)
+<img width="624" height="820" alt="test-ss" src="https://github.com/user-attachments/assets/e3819a9b-37ce-4647-b5a1-00a6de2404d7" />
+
 
 Coverage:
 
@@ -573,7 +576,8 @@ P95 latency:
 ~519 ms
 ```
 
-(Add load test screenshot here)
+<img width="595" height="503" alt="load_test ss" src="https://github.com/user-attachments/assets/6e37ec76-923c-4ee0-ada2-3c510915fe39" />
+
 
 Stress testing showed that transaction correctness was maintained under concurrent load, while higher traffic increased latency due to deployment and database resource limitations.
 
