@@ -232,7 +232,7 @@ Features:
 
 * Net balance calculation
 * Bilateral debt optimization
-* Settlement suggestions
+* Optimized settlement calculation
 * Settlement execution through wallet transactions
 * Invoice settlement tracking
 
@@ -485,12 +485,11 @@ Reliability:
 Implemented:
 
 * JWT authentication
-* Protected APIs
-* Wallet ownership checks
-* Group role validation
-* Owner-only permissions
-* Invalid state transition prevention
-* Request throttling
+* Protected REST APIs
+* Wallet ownership validation
+* Group role-based authorization
+* Owner-only permission enforcement
+* Invalid transaction and invoice state prevention
 
 ---
 
@@ -601,7 +600,7 @@ Measured:
 Environment:
 
 ```
-Client
+API Request
 
  ↓
 
@@ -648,14 +647,7 @@ P95 Latency:
 <img width="595" height="503" alt="load_test ss" src="https://github.com/user-attachments/assets/476f9b5a-bb0c-433d-95fd-41ee55fcf598" />
 
 
-Stress testing identified deployment resource limits as the scaling bottleneck.
-
-Future scaling:
-
-* Connection pooling
-* Worker tuning
-* Horizontal scaling
-* Caching
+Stress testing showed that the transaction service handled concurrent requests correctly, while higher traffic increased latency due to deployment and database resource limitations.
 
 ---
 
@@ -697,6 +689,11 @@ Deployment:
 * Gunicorn
 * WhiteNoise
 
+Configuration:
+
+* Environment variables
+* .env.example
+* requirements.txt dependency management
 ---
 
 # Local Setup
@@ -803,6 +800,9 @@ Current deployment:
 # Future Improvements
 
 * User-facing web/mobile application for managing wallets, tribe payments, cash invoices, splits, and settlements
+
 * Docker-based containerization to simplify environment setup and maintain consistent deployments across systems
+
 * Enhanced observability with structured transaction logging to trace payment workflows across wallet, invoice, split, and settlement services
+
 * Database performance optimization using indexing and connection pooling to improve scalability under higher concurrent transaction loads
