@@ -17,10 +17,6 @@ class TransferSerializer(serializers.Serializer):
         min_value=Decimal("0.01")
     )
 
-    idempotency_key = serializers.UUIDField(
-        required=False,
-        allow_null=True
-    )
 
 
 class TransactionResponseSerializer(serializers.ModelSerializer):

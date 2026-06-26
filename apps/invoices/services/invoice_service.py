@@ -19,10 +19,11 @@ def create_invoice(
     payer,
     amount,
     description,
-    invoice_type="REQUEST"
+    invoice_type="REQUEST",
+    target_wallet = None
 ):
 
-    if created_by == payer:
+    if created_by == payer and not target_wallet:
 
         raise ValidationError(
             "Cannot create invoice for yourself."
@@ -39,10 +40,19 @@ def create_invoice(
         payer=payer,
         amount=amount,
         description=description,
-        invoice_type=invoice_type
+        invoice_type=invoice_type,
+        target_wallet = target_wallet
     )
 
-    if invoice_type == "REQUEST":
+    if target_wallet:
+
+        message = (
+            f"{created_by.username} requested "
+            f"₹{amount} for group "
+            f"{target_wallet.group_name}."
+        )
+
+    elif invoice_type == "REQUEST":
 
         message = (
             f"{created_by.username} requested "
@@ -103,12 +113,16 @@ def pay_invoice(
         ).wallet
     )
 
-    receiver_wallet = (
-        WalletMembership.objects.select_related("wallet").get(
-            user=invoice.created_by,
-            wallet__wallet_type="PRS"
-        ).wallet
-    )
+    if invoice.target_wallet:
+        receiver_wallet = invoice.target_wallet
+
+    else:
+        receiver_wallet = (
+            WalletMembership.objects.select_related("wallet").get(
+                user=invoice.created_by,
+                wallet__wallet_type="PRS"
+            ).wallet
+        )
 
     idempotency_key = str(uuid.uuid4())
 
@@ -127,6 +141,14 @@ def pay_invoice(
     invoice.paid_at = timezone.now()
 
     invoice.save()
+
+    create_notification(
+        user=invoice.created_by,
+        message=(
+            f"{user.username} paid your "
+            f"₹{invoice.amount} invoice."
+        )
+    )
 
 
     return invoice

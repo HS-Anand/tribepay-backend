@@ -25,6 +25,9 @@ from apps.wallets.services.smart_payment_service import smart_payment
 
 from apps.wallets.services.add_money_service import add_money
 
+from apps.wallets.services.group_cash_invoice_service import group_cash_request
+from apps.wallets.services.group_spend_limit_service import set_spending_limit
+
 from apps.wallets.services.group_wallet_service import (
     create_group_wallet,
     request_join_group,
@@ -46,6 +49,8 @@ from apps.wallets.serializers import (
     PendingJoinRequestSerializer,
     LeaveGroupSerializer,
     RemoveMemberSerializer,
+    GroupCashRequestSerializer,
+    GroupLimitSerializer,
     SmartPaymentSerializer
 )
 
@@ -110,7 +115,7 @@ class AddMoneyView(APIView):
         except ValidationError as e:
 
             return Response(
-                {"error": e.message},
+                {"error": e.detail},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -514,6 +519,71 @@ class RemoveMemberView(APIView):
         return Response(
             {"message": "Member removed successfully."}
         )
+
+
+@extend_schema_view(
+    post = extend_schema(
+        tags=["Groups"],
+        request = GroupCashRequestSerializer
+    )
+)
+class GroupCashRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        serializer = GroupCashRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception = True)
+
+        cash_request = serializer.validated_data["cash_request"]
+
+        invoice_count = group_cash_request(
+            user = request.user,
+            group_code = serializer.validated_data["group_code"], 
+            cash_request = serializer.validated_data["cash_request"],
+            description = serializer.validated_data["description"]
+        )
+
+        return Response(
+            {
+                "message": (f"Cash request invoice of ₹{cash_request} created for all {invoice_count} group members")
+            },
+                status = status.HTTP_201_CREATED
+        )
+
+
+@extend_schema_view(
+    post = extend_schema(
+        tags = ["Groups"],
+        request = GroupLimitSerializer
+    )
+)
+class GroupLimitView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        serializer = GroupLimitSerializer(data=request.data)
+        serializer.is_valid(raise_exception = True)
+
+        group_code = serializer.validated_data["group_code"]
+        spending_limit = serializer.validated_data["spending_limit"]
+
+        group_name = set_spending_limit(
+            user = request.user,
+            group_code = group_code,
+            spending_limit = spending_limit
+        )
+
+        return Response(
+            {
+                "message": (f"Spending limit of ₹{spending_limit} has been set for group {group_name}")
+            },
+                status = status.HTTP_200_OK
+            
+        )
+
+
 
 
 @extend_schema(

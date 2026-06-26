@@ -16,6 +16,8 @@ class WalletSerializer(serializers.ModelSerializer):
             "is_active",
             "created_at",
             "updated_at",
+            "group_code",
+            "spending_limit"
         ]
 
 
@@ -139,6 +141,30 @@ class RemoveMemberSerializer(serializers.Serializer):
     group_id = serializers.UUIDField()
 
     username = serializers.CharField()
+
+
+class GroupCashRequestSerializer(serializers.Serializer):
+
+    group_code = serializers.CharField(max_length=6)
+
+    cash_request = serializers.DecimalField(
+        max_digits = 12,
+        decimal_places = 2
+    )
+
+    description = serializers.CharField(max_length=40)
+
+
+class GroupLimitSerializer(serializers.Serializer):
+
+    group_code = serializers.CharField(max_length=6)
+
+    spending_limit = serializers.DecimalField(
+        max_digits = 12,
+        decimal_places = 2,
+        min_value = 100
+    )
+
 
 
 class SmartPaymentMemberSerializer(serializers.Serializer):

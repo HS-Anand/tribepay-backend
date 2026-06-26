@@ -28,6 +28,13 @@ class Wallet(models.Model):
         default=Decimal("0.00")
     )
 
+    spending_limit = models.DecimalField(
+        max_digits = 12,
+        decimal_places = 2,
+        null = True,
+        blank = True
+    )
+
     group_name = models.CharField(
         max_length=100,
         null=True,

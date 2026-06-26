@@ -90,6 +90,14 @@ class CashInvoice(models.Model):
         default=False
     )
 
+    target_wallet = models.ForeignKey(
+        "wallets.Wallet",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cash_requests"
+    )
+
     def __str__(self):
 
         return (

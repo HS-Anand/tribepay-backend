@@ -43,6 +43,13 @@ def transfer_funds(
 
     if amount <= 0:
         raise ValidationError("Amount must be positive.")
+    
+    sender = Wallet.objects.get(
+        wid = sender_wallet_id
+    )
+    if sender.wallet_type == "GRP":
+        if sender.spending_limit is not None and amount>sender.spending_limit:
+            raise ValidationError("Amount exceeds the group's spending limit.")
 
     if idempotency_key:
 

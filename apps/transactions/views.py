@@ -72,7 +72,7 @@ class TransferView(APIView):
 
         except ValidationError as e:
             return Response(
-                {"error": e.message},
+                {"error": e.detail},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
