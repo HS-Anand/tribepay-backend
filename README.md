@@ -1,5 +1,17 @@
 # TribePay
 
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Django](https://img.shields.io/badge/Django-5.2-092E20?logo=django)
+![Django REST Framework](https://img.shields.io/badge/DRF-REST%20API-A30000)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?logo=postgresql)
+![JWT](https://img.shields.io/badge/JWT-SimpleJWT-orange)
+![Celery](https://img.shields.io/badge/Celery-Background%20Jobs-37814A?logo=celery)
+![Redis](https://img.shields.io/badge/Redis-Cache%20%26%20Broker-DC382D?logo=redis)
+![Swagger](https://img.shields.io/badge/OpenAPI-Swagger-85EA2D?logo=swagger)
+![Gunicorn](https://img.shields.io/badge/Gunicorn-WSGI-499848)
+![Render](https://img.shields.io/badge/Render-Deployed-46E3B7?logo=render)
+![Tests](https://img.shields.io/badge/Tests-16%20Passed-brightgreen)
+
 ## Your tribe. Your money. Together.
 
 TribePay is a transaction-safe collaborative payment backend — wallet infrastructure for individuals and groups, built around financial correctness at every layer.
@@ -739,3 +751,13 @@ Currently deployed using:
 - Enhanced observability with structured transaction logging to trace payment workflows across wallet, invoice, split, and settlement services
 
 - Database performance optimization using indexing and connection pooling for higher concurrent transaction loads
+
+---
+
+# Author
+
+**Harkaran Anand**
+
+B.Tech Computer Science & Engineering
+
+MIT Manipal
