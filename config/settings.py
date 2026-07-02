@@ -81,15 +81,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default=(
-            f"postgres://"
-            f"{os.environ.get('POSTGRES_USER','harkarananand')}:"
-            f"{os.environ.get('POSTGRES_PASSWORD','your_password')}"
-            f"@{os.environ.get('POSTGRES_HOST','localhost')}:"
-            f"{os.environ.get('POSTGRES_PORT','5432')}/"
-            f"{os.environ.get('POSTGRES_DB','groupwallet')}"
-        ),
+    "default": dj_database_url.parse(
+        "postgresql://neondb_owner:npg_Q0z2AuCgaDPM@ep-broad-bird-aopy34z4-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
         conn_max_age=600,
     )
 }
