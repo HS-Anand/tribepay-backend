@@ -18,7 +18,7 @@ TribePay is a transaction-safe collaborative payment backend — wallet infrastr
 
 At its core, TribePay is powered by a money movement engine responsible for executing wallet transfers, maintaining a transaction ledger, and preserving financial consistency.
 
-On top of this transaction layer, TribePay enables shared tribe wallets, smart expense splitting, cash invoice requests, settlements, and automated background workflows.
+On top of this transaction layer, TribePay enables shared tribe wallets, smart payment splitting, cash invoice requests, settlements, and automated background workflows.
 
 **Live Swagger API:**  
 https://tribepay-backend.onrender.com/
@@ -453,7 +453,7 @@ Built using Django REST Framework.
 
 Features:
 
-- 28 documented REST APIs
+- 30 documented REST APIs
 - Swagger/OpenAPI documentation
 - Postman tested endpoints
 - Pagination
